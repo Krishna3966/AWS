@@ -1,0 +1,377 @@
+
+
+On-Premise Self Hosted Database : Hardware, OS Seleciton, OS Patching, DB HA, DB Backups.. 
+EC2 Instance Hosted DB : Hardware, OS --> AWS Responsibility.. OS Patching, HA, FT, Backups..
+Amazon RDS Hosted DB : Everything AWS Manages.. Choose DB Engine.. Enable features based on requirement.. 
+
+Relational Database : Structures schema + Relationships.. Data stores in Table format (Rows & Columns).. Banking, ERP, Transactions..  RDS.. 
+Non-Relational Database : JSON Format (Key and Value)..  Flexible schema.. Web apps, user profiles, Catalog, IoT.. DynamoDB
+Graph DB : Neo4j, Amazon Nepture.. Designed for connected data.. Social networking, Fraud Detection.. Recommendations..
+
+RDS : AWS SUpports 7 DB Engines..
+
+1. Amazon Aurora (Mysql Compatbale edition & PostGreSQL Compatable)
+2. MySQL : 3306 							: mysql workbench / dbeaver
+3. PostgreSQl : 5432 						: PGAdmin
+4. Microsoft SSQL : 1433 					: SSMS (SQL Server Management Studio)
+5. MariaDB : 3306 							: Workbench
+6. Oracle DB : 1521 						: sql developer / Toad
+7. IBM DB2 : 50000 (Non-ssl), 50001 (SSl)	: IBM Enterprise Tool
+
+----
+
+Pre-Req : Create a DB Subnet group with Custom VPCs DB Subnets. 
+Create a SG. Make sure to follow Pipeline mechanism.
+
+----
+
+EOS : End of Standard SUpport & Extended Support
+EOL : End of Life
+LTS : Long term support
+
+----
+
+Username: dbadmin
+Password : Avinash12345 
+
+----
+
+** We cannot connect to underlying Operating System. We can't manage OS level processes. 
+
+Public Access : NO
+
+You can configure a CNAME in Route53 for RDS Endpoint. later, if we create a new db, we can map new db endpoint to the same name.. without changing anything in the application code.
+
+Endpoint name	: myfirstdb.chggu4icev4n.ap-south-1.rds.amazonaws.com
+R53 CNAME 		: rds.awswithavinashreddy.com
+
+----
+
+sudo dnf install mariadb105 -y					==> Installed mysql client tool
+
+mysql -h <hostname> -u <user-name> -P <port-number> -p
+
+mysql -h rds.awswithavinashreddy.com -u dbadmin -P 3306 -p
+
+SHOW DATABASES;
+
+CREATE DATABASE mystudentsdb;
+
+USE mystudentsdb;
+
+CREATE TABLE users (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(100),
+	age INT
+);
+
+users 
+|
+|-> Id (integrer, Automatically generated, unique)
+|-> name (text, upto 100 charectors)
+|-> age (integer)
+
+
+SHOW TABLES;
+
+DESC users;
+
+SELECT * FROM users;
+
+INSERT INTO users (name, age) VALUES ('Avinash', 36);
+INSERT INTO users (name, age) VALUES ('Anudeep', 34);
+INSERT INTO users (name, age) VALUES ('Aravind', 30);
+
+
+SELECT * FROM users LIMIT 1;
+SELECT * FROM users WHERE age > 32;
+SELECT name FROM users WHERE age > 32;
+
+UPDATE users SET age = 31 WHERE name = 'Aravind';
+
+DELETE FROM users WHERE name = 'Avinash';
+
+TRUNCATE TABLE users;			--> Delete all data from a table
+
+DROP DATABASE mystudentsdb;
+
+---
+
+SELECT user, host FROM mysql.user;
+
+'root'@'localhost'			--> root user can connect from only from loal machine/internal
+'root'@'192.168.100.10'		--> root user can connect from only given IP
+'root'@'%'					--> root user can connect from any IP/host
+
+CREATE USER 'avinash'@'%' IDENTIFIED BY 'Avinash12345';
+
+GRANT SELECT, INSERT, UPDATE ON mystudentsdb.* TO 'avinash'@'%';
+
+FLUSH PRIVILEGES;
+
+EXIT;
+
+---
+
+mysql -h rds.awswithavinashreddy.com -u avinash -P 3306 -p
+
+
+===================
+
+
+Single-AZ DB instance deployment (1 instance): Creates a single DB instance without standby instances. This setup provides:
+99.5% uptime & No data redundancy
+
+Multi-AZ DB instance deployment (2 instances): Creates a primary DB instance with a "non-readable standby instance" in a separate Availability Zone. This setup provides:
+99.95% uptime & Redundancy across Availability Zones.
+
+Multi-AZ DB cluster deployment (3 instances) : Creates a primary DB instance with "two readable standbys" in separate Availability Zones. This setup provides:
+99.95% uptime & Redundancy across Availability Zones
+Increased read capacity & Reduced write latency
+
+
+nslookup database-1.chc66g4wq10o.ap-south-1.rds.amazonaws.com
+
+database-1.chc66g4wq10o.ap-south-1.rds.amazonaws.com
+admin
+Avinash12345
+
+
+One interview point worth adding: Multi-AZ DB instance uses synchronous replication, while Multi-AZ DB cluster uses semi-synchronous replication. Semi-sync means a write is confirmed once at least one reader acknowledges it, which is why the cluster gets faster commits and faster failover.
+
+
+----
+
+
+Name:   database-1.chc66g4wq10o.ap-south-1.rds.amazonaws.com
+Address: 10.0.2.102. --> Pv2 - ap-south-1b
+
+Non-authoritative answer:
+Name:    database-1.chc66g4wq10o.ap-south-1.rds.amazonaws.com
+Address:  10.0.2.34 --> pv1 - ap-south-1a
+
+Reboot With Failover?
+Tickbox Ticked 		--> We are triggering a Manual, forced switchover to another AZ
+Tickbox Not-Ticked 	--> Both the AZ copies restart and wont switchover.
+
+====================
+
+Read Replica : 
+
+We get another copy of our DB, We can choose required configuration for Replica.
+--> Replicas support only read only operations.
+--> If required we can create replica copy in another AZ / Another Region. 
+--> When we perform write operation to WRITER/PRIMARY DB, It replicates to Replica without delays. 
+--> We can promote replica to primary copy. Its irreversable process. 
+
+==> We have an BI Application, that need to scan our entire DB to generate the report. When the scan is happening, your DB is facing perfarmance issues. How you design a solution to fix the DB perm issue..? 
+
+Ans: create a read replica and point the BI application to Read Replica to generate the report. Based on load, we cna adjust the read replicas configuration.
+
+
+=============================================================================
+
+Amazon Aurora : Its AWS Own Database Engine..
+It has two compatible editions:
+1. MySQL compatible
+2. PostgreSQL compatible
+
+Aurora also has a serverless option. We can configure minimum and maximum ACUs based on the load. We measure the configuration by using ACU (Aurora Capacity Unit). 
+--> 1 ACU provides 2 GB of memory. 
+
+--> Most of the other databases support a maximum storage of 64 TB only but Amazon Aurora supports up to 128 TB. 
+
+--> Aurora gives 5x better performance at lower cost than other enterprise databases. 
+
+--> Six-way replication across three Availability Zones
+--> Up to 15 read replicas with replica lag under 10-ms
+--> Automatic monitoring with failover
+
+
+We dont have option to disable the backup on Aurora
+Min : 1 Day for Aurora (other DB: We can turn off this feature)
+Max : 35 Days (For all DBs)
+
+
+
+-----
+
+
+Question : for a regular on-premises or self-managed MySQL database we have a configuration file, my.cfg, where we can adjust all the MySQL settings.How can we manage/adjust the settings for AWS-hosted databases? 
+
+Ans : we can adjust the "parameter group" associated with the RDS instance to adjust any of the MySQL configuration settings. 
+--> Some of the settings may require us to restart the DB instance to take effect. 
+
+
+binlog
+cache
+connection
+timeout
+
+----
+
+Question : you are preparing an application for one of the corporate school/college lab environments. Students have to explore the RDS, Once their lab is completed, we dont want the data students created. 
+You need to provide a fresh database to another set of students. You don't want to create multiple databases for every batch. You decided to use the same databases for different batches. How can you achieve this? 
+
+Ans: use Amazon Aurora with the backtracking option. It supports 72 hours of backtracking. 
+
+---
+
+Snapshot : a snapshot is nothing but a backup copy of our database. A snapshot happens based on two things:
+1. the backup window we configured on our DB cluster
+2. whenever we are performing any major modifications on our database, Atlas automatically takes a snapshot.
+
+3. We always have option to create a snapshot manually.
+
+
+---
+
+We have 2 options to restore our Database.
+
+1. Snapshot (Use latest snapshot and restore the DB) 
+2. PITR : Point In Time Recovery : AWS automatically backups data, we can choose the time frame to get a new copy of our DB.
+
+
+=============================================================================
+
+Blue & green deployment, Backtracking & RDS Proxy
+
+https://www.youtube.com/watch?v=OmwutfPSdd4
+
+https://www.youtube.com/watch?v=Mko0C7oQQAw
+
+https://www.youtube.com/watch?v=0pxrVeT9fgg&t=51s
+
+
+=============================================================================
+
+D: 26/09/2026
+
+
+A cache is a high-speed temporary data storage layer that holds frequently accessed data in memory. 
+--> The primary goal of a cache is to serve future data requests faster. 
+--> The cache will significantly reduce the workload on the primary database. 
+--> very less latency
+--> primary database load will decrease.
+
+How cache works: 
+1. Cache hit : the application checks the cache first. If the requested data is found it is returned instantly. 
+2. Cache Miss : if data is not in the cache, the application is forced to query the primary database. Once it retrieves the requested information, data is sent back to the user and written or stored into the cache. The next time someone asks for the exact data, it results from cache. 
+
+Common caching strategies: 
+Cache-Aside : Cache-Aside is the most common approach. The application explicitly talks to both the cache and the database. The application checks the cache first. If it misses, it queries the database and manually updates the cache. 
+
+Write-Through : the application writes data directly to the cache, which synchronously updates the backend database before completing the operation. 
+
+write-behind (write-back): the application writes data straight to the cache, which immediately acknowledges the write. The cache then updates the primary database synchronously later. 
+
+---
+
+
+Elasticache : it's a caching service designed for RDS. It can cache RDS database information and we can integrate our application with this cache before directly hitting our database to get the information. 
+
+--> Redis OSS
+--> valkey Cache (*Recommended)
+--> memcacheD
+
+---
+
+DynamoDB : dynamoDB has a caching service. The service name is DAX (DynamoDB Accelerator). 
+
+---
+
+DynamoDB is a serverless, non-relational database, commonly called a NoSQL database. Data strores in JSON format, simple key and values pairs. 
+
+--> Single-digit millisecond latency at any scale of data.
+
+{
+"name": "Avinash"
+"age": "36"
+},
+{
+"name": "Anudeep"
+"age": "35"
+}
+
+
+Primary key : it's a unique column in a database table that guarantees every single row can be identified. 
+
+Rules of Priamry key:
+1. Uniqueness : No two rows in table can share same primary key
+2. Non-null values : can never be empty
+3. Single constraint : table can have only one primary key
+4. Immutability : the value of primary key should never changed once created.
+
+
+---
+
+OLTP : Online Transaction Processing : RDS
+--> Banking transactions
+--> Online / e-commerce
+--> ATM Withdrawals
+
+--> CRUD : Create / Read / Update / Delete
+--> Mainly focused on Operational Data
+
+
+OLAP : Online Analytical Processing : Redshift, Snowflake, Databricks
+Used for analytics and reporting on large datasets, originated from multiple sources.
+
+--> Sales report
+--> Trend analysis
+--> Business Intelligence Dashboards
+
+--> Can read a huge amount of historical data 
+--> Can perform complex queries 
+--> Can perform analytics and help us in decision making 
+
+---
+
+Redshift : redshift offers OLAP on AWS. It can integrate with other AWS services. It's called an AWS data warehousing solution. 
+
+Leader Node : the leader node plans the query execution and it is responsible for executing the query and providing the result. 
+Compute Node : a compute node is a machine that actually stores all the huge data. 
+
+WLM : workload management : WLM helps us to control how queries can use cluster resources so one heavy query doesn't choke everything else. 
+
+How WLM works: WLM lets you create queues. Each queue gets a dedicated slice of memory and concurrency slots. 
+
+Queue : a lane of data flow
+Each queue has a memory limit and max concurrency slots.
+Queries routes to Queue based on rules.
+
+Auto WLM : redshift automatically manages the memory and concurrency. 
+Manual WLM : we can define the queue's memory percentage and slots ourselves. 
+
+-----
+
+DMS : Database Migration Service. We can use this DMS service to perform homogeneous migrations and heterogeneous migrations. 
+
+homogeneous migrations : Same class of DB source and target data migration. (mysql --> mysql)
+heterogeneous migrations : Diff class cource and target migration (Mongodb --> postgre)
+
+Full Load : Replicate all existing data once.
+
+CDC - Change Data Capture : Ongoing changes will replicate
+
+Full Load + CDC : Once full load and then ongoing changes will replicate.
+
+----
+
+
+How to connect to private subnet DB via Public Subnet Hosted Jump server.? 
+Ans :  Use mysql TCP/IP over SSH option.. Via Jump server (with pwd / keypair)..
+
+
+
+
+
+
+
+
+
+
+
+
+
+

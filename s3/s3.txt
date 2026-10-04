@@ -1,0 +1,469 @@
+
+D: 28/09/2026
+
+
+Storage Types : 
+Block Based Storage : We can attach to instance, we can run OS.. Install programs.. : EBS 
+Storage over network / Shared Storage : EFS
+Object Based Storage : Everything stores as a object / flat file. We cannot install any OS, run any application : S3
+
+
+
+S3 : simple storage service. 
+
+--> We can store all flat files. 
+--> We have to create a bucket to store the object. The object can be anything. 
+
+Bucket = folder / Directory with unique namespace.
+Object = Whatever we store inside a bucket, we call it as a object.
+
+General purpose Bucket : it's a traditional S3 bucket for storing objects like files, images, backups, videos, and audios. Data spans across Multi AZs.
+
+Directory Bucket : a special bucket designed for S3 Express One Zone, providing low latency for single-availability-zone applications. Data stores only in 1 AZ.
+
+Table Bucket : table buckets designed for storing Apache Iceberg tables. We can use this table for analytical purposes. 
+
+vector Bucket : the purpose of a vector bucket is for storing and querying vector embeddings with vector indexes and similarity search APIs. AI/ML - RAG, semantic Search.. 
+
+Similar meaning --> Nearby Vectors
+Different Meaning --> Distant vector
+
+---
+
+Global Namespace : Bucket name should be unique across the globe. 
+
+Account Regional namespace : General purpose buckets created in your account Regional namespace are unique to your account. These buckets can never be created by another AWS account.
+
+
+Bucket Naming standards: 
+- Minimum 3 characters
+- Maximum 63 characters
+- No Capital letters
+- Should not start with a dot
+- Should not end with a dot
+- No adjacent dots
+- Should not resemble an IP address format
+
+--> We have unlimited storage in the S3 platform. 
+
+--> Min Obj Size : 0 bytes
+--> Max Obj Size : 50 TB (Earlier its 5 TB only)
+
+aws s3 mb s3://bucketname --region ap-south-2
+
+
+
+Standard path : https://s3.<region-code>.amazonaws.com/<bucket-name>/<object-name>
+
+Virtual path: this works when we don't have a "dot" in the bucket name. 
+https://<bucket-name>.s3.<region-name>.amazonaws.com/<object-name>
+https://<bucket-name>.s3.amazonaws.com/<object-name>
+
+---
+
+By default, all our buckets are private and whatever data you upload to that bucket is also private. 
+
+Account-level block public access : OFF By default..
+Bucket-level block public access 
+Object-level public access
+
+---
+
+Step 1 : Turn off public access at the bucket level. 
+step 2 : We have 2 options to make objects public
+	--> Bucket Policy (later and widely used)
+	--> ACLs : Disabled by default. Enable it.. (Object Ownership --> ACLs enabled)
+Step 3 : Choose the object and make it public using ACL.
+
+---
+Access Pattern : 
+How frequestnly we are accessing our data, 
+WHen we need, how quickly we need the data..
+---
+
+S3 Storage Classes : 
+
+S3 Standard : designed for frequently accessed data with millisecond access.
+- We can access data without any delays.
+- Data spans across multiple availability zones (>= 3 AZs)
+- 99.99% Availability.. 99.999999999% Durability..
+
+Standard-IA (Infrequently Accessed) : designed to store less frequently accessed data. 
+- We can access data  without any delays.
+- Data spans across multiple availability zones (>= 3 AZs)
+- 99.99% Availability.. 99.999999999% Durability..
+
+OneZone-IA (Infrequently Accessed) : designed to store less frequently accessed data. 
+- We can access data without any delays.
+- Data store only in 1 availability zones (1 AZs)
+- 99.95% Availability.. 99.999999999% Durability..
+
+Glacier Instant Archieve :
+--> Long-lived archive data access once a quarter with instant retrieval in milliseconds. 
+
+Glacier Flexible Retrieval : 
+- Long-lived archive data accessed once a year with Retrieval time 2 to 5 hours. 
+- We cannot access data immediately. 
+- We need to initialise the data restoration to view the object. 
+
+Glacier Deep Archieve : 
+- Long-lived archive data accessed once a year with Retrieval time 12 to 24 hours. 
+- We cannot access data immediately.
+- We need to initialise the data restoration to view the object. 
+
+Data Retrival Options:
+Bulk Retrival : data retried typically within 5 to 12 hours. 
+Standard Retrival : data retried typically within 3 to 5 hours. 
+Expedited Retrival : data retried typically within 1 to 5 minutes, Max obj size is 250 MB. 
+
+
+RRS : reduced redundant storage : "not recommended" as durability is just 99.99% and cost is more than standard. 
+
+Intelligent tiering : we can store data with changing or unknown access patterns. 
+
+
+========================
+
+S3 Pricing : 
+
+- How many API calls are happening on our data? (GET / PUT / DELETE / UPDATE)
+- How much data is being transferred?
+- How much data are you storing S3 in GB or TB per day?
+- What storage class are you using: Standard, IA, Standard, Glacier, or Infrequently Accessed?
+- Are you performing any data retrievals from storage classes?
+
+========================
+
+D: 29/09/2026
+
+Versioning : versioning helps to maintain multiple copies of our object within the same bucket. 
+- By default versioning will be in a suspended state. 
+- Existing objects won't have any version ID. After enabling versioning all uploads will get a version ID. We cannot manage or edit this ID. 
+
+- If any override happens we can delete one particular version to get our object to a proper state. 
+- If any object is deleted accidentally (Versioning = hide state), we will get a delete marker. Delete the delete marker to get the object back. 
+
+
+Permanently delete : Object is Gone, No way to get the object back.
+Delete : We will get a delete marker, Delete the delete marker to get the object back.
+
+----
+
+Problem 1 : when we enable versioning and start using versioning, for every edit we will get a version and obviously this will incur more cost. 
+
+Problem 2 : we have some data. We are going to access the data 
+- frequently for the first 30 days, 
+- less frequently for 30 to 90 days.
+- As a compliance requirement, we need to store the data for at least 3 years and 
+- after 3 years it needs to be deleted automatically. 
+
+Solution : 
+life cycle management role / LCR : LCR helps to transition an object from one storage class to another storage class based on the defined days. Also we can configure to Delete an object at a particular time. 
+
+- We can apply a particular transition configuration for current versioned objects and 
+- another set of configuration for non-current versioned objects. 
+- We do have an option to apply retention for the most recent copies. 
+
+=============
+
+Replication : 
+
+SRR : Same Region Replication : Source bucket and target backets are in same region.
+CRR : Cross Region Replication : Source bucket and target backets are in diff region.
+
+--> Versioning must be enabled on the source and target buckets to use this replication option. 
+
+RTC : replication time control. This feature helps us to replicate any data to a target bucket within 15 minutes (99.99%). 
+
+
+** EXAM : The source bucket already has some data. You decided to enable replication to another bucket. How can you replicate existing data? 
+Ans : we can configure or create a one-time batch job and replicate the data. 
+
+--- 
+--> We can use sync command to replicate all existing data to target bucket, then we cna configure replication.
+aws s3 sync s3://source-bucket-name s3://target-bucket-name
+
+--- 
+
+Event Notifications: 
+
+Lambda function : Run a Lambda function script based on S3 events.
+SNS topic : Fanout messages to systems for parallel processing or directly to people.
+SQS queue : Send notifications to an SQS queue to be read by a server.
+
+============================================================
+
+D: 30/09/2026
+
+
+Encryption is the process of converting human-readable data into unreadable or cypher/scrambled text to protect its privacy and security. 
+
+Plaintext: The original readable information
+Ciphertext: the scrambled, unreadable data
+Cryptographic Keys : a special digital code or mathematical value used to lock (encrypt) and unlock (decrypt) the information back into readable form 
+
+Symmetric encryption : use the exact same key for encryption and decrypting the data. 
+Asymmetric encryption : uses a pair of keys: a public key to lock/encryption the message and a private key to unlock/decryption it. 
+
+
+encode : scrambled text is fixed.
+encrypt : scrambled text will/can be change.
+
+
+--
+
+In-Transit Encryption / At-Flight Encryption : when the data is in the travel state to the S3 platform, data will be encrypted, similar to websites with the HTTPS protocol (SSL or TLS certificate).  
+
+Client Side Encryption / CSE : before uploading data to the S3 platform, we can use our own encryption method and we can encrypt the data. This is purely the customer's responsibility. 
+
+Server Side Encryption / SSE : when data is in the S3 platform, we can apply our required encryption method. We have multiple options here. 
+
+
+Server Side Encryption with S3 managed keys (SSE-S3) : default encryption method..
+- S3 Generates and Manages the key material.
+- Whoever has access to the S3 platform can decrypt the data. No additional permissions required. 
+- We "can make data public" using only this particular key type. 
+- No direct access to key material. We cannot view/alter/delete/rotate the keys. 
+
+---
+
+SSE - KMS (Key Management Service) - DMK (Default Master Key)
+- KMS Service Generates and Manages the key material.
+- Whoever has access to the S3 platform can decrypt the data. No additional permissions required. 
+- No direct access to key material. We cannot view/alter/delete/rotate the keys. 
+- This key is created automatically whenever we start using any of the services. 
+- We cannot make objects public. 
+
+---
+
+SSE - KMS (Key Management Service) - CMK (Customer Master Key)
+- Customer has to Create the KMS Key... KMS Service Manages the key material.. 
+- User should have S3 Access first.. User/role should have permissions on KMS Key as well (usage permissions).
+- No direct access to key material. We can rotate the key material.  
+- We cannot make objects public. 
+
+---
+
+SSE - KMS (Key Management Service) - C (Customer provided Key)
+- Customer has to Create and Manages his own key and ...  We need to upload the Key to KMS Service.. 
+- User should have S3 Access first.. User/role should have permissions on KMS Key as well (usage permissions).
+- Customer is responsible for key material and he can rotate the key material based his requirement.  
+- We cannot make objects public. 
+- https://youtu.be/r17Z75TqjU0?si=D2dfZQViUuVnY6Bw
+
+---
+
+Key creation steps:
+
+1. Configure key : choose "symmetric" and "encryption and decryption".
+2. Add labels i.e; alias, description, tags..
+3. Define key administrative permissions (Avinash_T)
+4. Define key usage permissions (Avinash_T)
+5. Review and create
+
+---
+
+signature version 4 : outdated signature protocol, missing credentials, or mismatched cryptographic key. 
+
+---
+
+Interview : you have an EC2 instance. You are trying to access an S3 bucket from the EC2 instance but you are not able to access the data. 
+- You are able to list the buckets but you are not able to access data from one particular bucket. 
+- What might be the reason? How you troubleshoot? 
+
+Answer : (User / Role)
+- I will verify the IAM user's permission on that particular bucket. 
+- I will verify whether the S3 bucket has any particular encryption key. 
+- Will also verify that particular IAM user's permissions on KMS key usage permissions. 
+
+---
+
+Interview : a user has S3 full access but still he is not able to access some of the data. What might be the reason? How you troubleshooted? 
+
+---
+
+OBJECT LOCK : we can store objects using the WORM (Write-Once-Read-Many Model ) model to help prevent objects from being deleted or overridden for a fixed amount of time. Object lock works only in versioned buckets. We have two types of modes:
+
+1. Governance : users with specific IM permissions can override or delete protected object versions during the retention period. (PERMISSIVE)
+
+2. Compliance : no user can override or delete protected object versions during the retention period, "including the root user". 
+
+----
+
+Transfer Acceleration : we can upload data to an S3 bucket via edge locations or a CloudFront distribution. 
+
+https://s3-accelerate-speedtest.s3-accelerate.amazonaws.com/en/accelerate-speed-comparsion.html?region=ap-south-1&origBucketName=avinash
+
+====================================================================
+
+D: 01/10/2026
+
+
+We have an IAM user. The user has S3 full access but one bucket is hosting some confidential information. I don't want to allow this user to perform delete, upload, view, or open objects in that particular bucket. 
+
+ARN : Amazon Resource Name
+
+Bucket ARN : arn:aws:s3:::avinash28092026
+Prinicipal : user arn
+Effect : Allow / Deny
+Actions to take effect : PutObject, GetObject, DeleteObject, *
+
+
+Bucket Level Operations : arn:aws:s3:::avinash28092026
+Object Level Operations : arn:aws:s3:::avinash28092026/folder/* , arn:aws:s3:::avinash28092026/*
+
+** If you're not sure about bucket-level or object-level operation, add both. 
+
+
+Bucket ARN : arn:aws:s3:::avinash28092026, arn:aws:s3:::avinash28092026/*
+Prinicipal : arn:aws:iam::992189742322:user/encry-test
+Effect : Deny
+Actions to take effect : PutObject, GetObject, DeleteObject
+
+https://awspolicygen.s3.amazonaws.com/policygen.html
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Statement1",
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": "arn:aws:iam::992189742322:user/encry-test"
+      },
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:DeleteObject",
+        "s3:DeleteObjectVersion",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketPolicyStatus",
+        "s3:DeleteBucketPolicy"
+      ],
+      "Resource": [
+        "arn:aws:s3:::avinash28092026",
+        "arn:aws:s3:::avinash28092026/*"
+      ]
+    }
+}
+
+----
+
+I want to make an entire bucket public.. 
+
+Effect : Allow
+Actions : GetObject
+Resource : arn:aws:s3:::avinash28092026/*
+Principal : *
+
+----
+
+Scenario: one bucket should be accessible for only one particular user. If other users have S3 full access or administrator access, they should not be able to work on this particular bucket. 
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyAllExceptEncryTest",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::avinash28092026",
+        "arn:aws:s3:::avinash28092026/*"
+      ],
+      "Condition": {
+        "ArnNotEquals": {
+          "aws:PrincipalArn": "arn:aws:iam::992189742322:user/encry-test"
+        }
+      }
+    }
+  ]
+}
+
+================
+
+CORS : cross-Origin-Resource-Sharing : . It is a browser security mechanism that allows or restricts a web page from requesting resources (like APIs, fonts, or images) from a different domain than the one it was loaded from.
+
+https://www.youtube.com/watch?v=YrfDLrSVxQ8&t=239s
+
+[
+  {
+    "AllowedOrigins": [
+      "https://yourdomain.com",
+      "https://yourdomain.com"
+    ],
+    "AllowedMethods": [
+      "GET",
+      "HEAD"
+    ],
+    "AllowedHeaders": [
+      "*"
+    ],
+    "ExposeHeaders": [
+      "ETag",
+      "x-amz-meta-custom-header"
+    ],
+    "MaxAgeSeconds": 3000
+  }
+]
+
+
+==============================
+
+Presigned URL : Temporary URL that gives someone access to a private S3 object without giving them AWS credentials , The URL should expire after particular period of time.
+
+aws s3 presign s3://avinash28092026/s3.txt --expires-in 60
+
+--> Without making a bucket public, without making an object public, we do have an option to share an object with everyone using a presigned URL. That URL expires after the given time. 
+
+==============================
+
+S3 MultiPart Upload : 
+
+We can upload a large object to S3 in smaller chunks/parts. 
+
+- Has feature to resume if object failed to upload. 
+- Faster uploads using parallelism. 
+- We can choose for larger or huge files. 
+
+aws s3api create-multipart-upload --bucket avinash --key largefile.zip
+
+aws configure set default.multipart_chunksize 128MB
+
+---
+
+We can use third-party tools to access S3 data. 
+
+https://s3browser.com/
+https://www.msp360.com/explorer/windows/
+
+==============================
+
+S3 default performance:
+
+3500 PUT operations per second per prefix 
+5500 GET operations per second per prefix. 
+
+--> Use more prefixes (Folder). 
+--> Every prefix supports 3500 PUT & 5500 GET.
+
+--> Add randomness to the object names so that the search mechanism works better. 
+(year/month/date/hr/sdr-name-timestamp)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

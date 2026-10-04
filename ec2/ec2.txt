@@ -1,0 +1,894 @@
+
+EC2 : Elastic Compute Cloud : 
+
+Server : Virtual Machiene : EC2 (AWS) : Azure VM (Azure) : GCP (Compute Engine)
+
+Basically a server is a powerful computer that serves information, files, or services to other computers. How a server works:
+1. The request: You click a link, check your email, or open an application.
+2. The delivery: Your device sends a digital request over the internet to the server.
+3. The response: The server processes a request then it sends the response back to your device.
+
+
+The commonly used servers are:
+- web servers
+- game servers
+- file servers
+- mail servers
+- Database Server
+- Caching Server
+
+Why can't we use our laptop/low hoardware as a server?
+1. Servers never sleep. They are designed to run 24 hours a day, 365 days a year without crashing.
+2. They are built for huge traffic handling. A laptop can handle one user or ten users but a server handles thousands of users at the exact same time.
+
+------------
+
+--> pay-as-you-go : Pay for the resource you actually use.
+--> pay-as-you-grow : Pay for the resources usage basis.. (more customers --> more servers --> more price)
+--> Go global in minutes
+
+------------
+
+1. On-Demand Instances : 
+--> No commitmenet with AWS - pay-as-you-go.
+--> Dev/IT/Test, Unptedictable workload, New application testings.
+--> Most expensive per hour.
+--> AWS cost us per seconds with min 60 sec.
+
+---------
+
+2. Reserved Instance : 
+--> Commitment for 1yr / 3 yrs.. You get big discount in the pricing.
+--> This is best for a steady predictable workload or an always-on kind of application. 
+
+Reserved instances we have two options:
+1. Standard reserved instance: This will be locked to a specific instance type or region with a good discount.
+2. Convertible reserved instance: We can change the instance family/size at a slightly lower discount than a standard reserved instance but we have that flexibility to change the configuration.
+
+Three pricing options in reserved instances:
+1. Full upfront: pay 100% of the amount and you get your instance.
+2. Partial upfront: pay 30-60% of the amount now then AWS will reduce the hourly price, you pay based on the reduced hourly price.
+3. No upfront: pay everything on a usage basis.
+
+** We can sell our reserved instances in AWS Marketplace, if we dont want it anymore. 
+
+---------
+
+3. Savings Plan : Savings Plans are a flexible pricing model that offer low prices on AWS usage, in exchange for a commitment to a consistent amount of usage (measured in $/hour) for a 1- or 3-year term.
+
+Compute Savings Plans : Applies to EC2 instance usage, AWS Fargate, and AWS Lambda service usage, regardless of Region, instance family, size, tenancy, and operating system.
+
+EC2 Instance Savings Plans : Applies to instance usage within the committed EC2 family and region, regardless of size, tenancy, and operating system.
+
+Database Savings Plans : Applies to Aurora, RDS, DynamoDB, ElastiCache, Amazon DocumentDB, Neptune, Amazon OpenSearch Service, and other services regardless of supported engine, instance family, size, deployment option, or Region.
+
+SageMaker Savings Plans : Applies to SageMaker service usage, regardless of Region, instance family, and component.
+
+---------
+
+4. Spot instances
+--> Bid for spare capacity. If our price is matching with aws spot price, aws provides an ec2 instance.
+--> These instance can be interrupted at any time, problem is: 2 minutes warning period. 
+--> If our application can be interrupted, even if any interruptions happen, no effect on our business processes 
+
+--> If price changed, AWS terminated the instance, we no need to pay for partial hours.
+--> If price not changed, YOU terminated instance, You need to pay for full duration.
+
+2 hrs 55 Minutes ==> 
+AWS terminate: 2 Hrs
+YOU terminate: 2 hrs 55 Minutes
+
+===========================================
+
+D: 17/08/2026
+
+General Purpose : balanced CPU + memory + network performance = T / M
+Compute Optimised : More CPU powered Instancea categery : C
+Memory Otimised : works load that req more data storage in RAM : R, U, X, Z
+Storage optimised : High IOPS / Throughput : I, D, H
+Accelerated Computing : CPU Installed and supported hardware : P, G, Trn
+HPC : High performance compute : hpc
+
+IOPS : Input and Outpur operations per second.
+
+i --> intel Processor
+a --> amd processor
+g --> graviton processor
+
+========
+
+Common Naming strategies we use in real environments
+
+P-LNX-WEB-ICI-03
+
+[Environment]-[Platform]-[ServiceType]-[clientID]-[S.No]
+
+Environment: 
+P --> Production
+U --> uat
+Q --> QA 
+D --> Dev
+T --> Training
+S --> sandbox
+L --> Central Logging
+N --> Central Networking
+
+Platform: 
+windows : WIN
+linux : LNX
+
+Service Type: 
+APP : application server
+DBS : database server
+Web : web server
+FSR : file server
+MEX : exchange server
+HDP : hadoop distro
+
+Client / Project id: 
+INT : Internal
+YES : yes bank
+ICI : icici bank
+HDF : hdfc bank
+
+---
+
+
+Step 1 : Name and tags
+
+Tag used to add metadata for our instance. 
+
+Name = above standard
+project = Project X
+Client id = client id
+Cost Center = AAZAA
+Platform = Linux / Windows
+owner/point of contact = Avinash
+
+
+Step 2 : Application and OS Images (Amazon Machine Image) - Choose AMI
+Choosing an AMI is nothing but selecting a preinstalled and configured operating system image to run along with the hardware. 
+
+Step 3 : Choose Instance type
+
+t3.micro
+t3.small
+c7i-flex.large		--> Choose This
+m7i-flex.large
+
+Step 4 : choose keypair
+
+An AWS key pair is a security credential mechanism used to authenticate your identity when connecting to an EC2 instance. It uses an asymmetric encryption method, meaning a public key and private key method. 
+
+AWS holds the public key and we will have our private key. When we want to get connected to the instance, we need to browse for the private key. The public key will be validated and verified against the private key we shared. If it matches, it allows us to log in or it generates a password. 
+
+Public Key ==> With AWS		==> Inside ec2 instance (~/.ssh/authorized_keys)
+Private key ==> With us
+
+	  laptop					AWS Cloud/Instance
+	Private key	------------------>	Public Key			==> Matching, pwd generates
+
+
+Step 5 : network COnfiguration
+
+Firewall (security groups) : A security group is a set of firewall rules that control the traffic for your instance. Add rules to allow specific traffic to reach your instance.
+
+ports: 65536 : 0 - 65535
+
+Windows connect : RDP : Remote Desktop Protocol : 3389
+Linux connect : SSH : Secure shell : 22
+web : http : 80
+secure web : https : 443
+DNS : 53
+ftp : file transfer protocol : 20 & 21
+NFS : Network File System : 2049
+mysql : 3306
+mssql : 1433
+postgresql: 5432
+
+
+From where you want to connect to instance.
+
+1. anywhere : 0.0.0.0/0 :::/0
+2. Custom : we can provide custom network IP addresses here. 
+3. myIP : This picks your currently connected network IP address. 
+
+Step 6 : Configure storage (EBS)
+
+Windows: 30 gb
+Linux: 8 gb / 10 gb
+
+=================
+
+To connect to Windows instances we need to have the supported tool:
+1. If you are using a Mac operating system, you download the Windows app from the App Store.
+
+2. Windows OS : 
+	search --> "remote Desktop" --> open app and provide instance public ip, Username, password.. popup yes
+	windows+r --> type "mstsc" --> click enter --> instance public ip, Username, password.. popup yes
+
+=================
+
+
+D: 18/08/2026
+
+Linux Instance launch
+
+1. Add tags
+2. Choose an AMI (Amazon Machiene Image) - OS (default username: ec2-user (redhat: redhat), (ubuntu: ubuntu/ec2-user))
+3. Choose an Instance Type - t3.micro
+4. Choose keypair : existing keypair / New keypair (.pem and .ppk)
+5. Create/Choose a SG : port 22 : SSH : MyIP / Anywhere / Custom
+6. Choose Storage : 8 Gb
+7. Review and create
+
+
+.pem ==> Private Enhanced Mail (open Standard), Native OpenSSH
+.ppk ==> Putty Private key (proprietary format), PuTTY
+
+We have an option to convert .pem to .ppk using PuttyGen
+
+
+---
+
+Linux is a free open-source operating system model designed on Unix, serving as a foundational backbone for most of the world's internet servers, cloud infrastructures, and supercomputers. 
+
+Why organisations prefer to choose Linux:
+1. Zero licencing cost. Linux is entirely free to download, use, and modify without purchasing licences or activation keys.
+2. Extreme stability and performance. Linux can handle system memory more effectively. Linux servers frequently run for years without requiring a single reboot.
+3. High security. The Linux operating system is inherently less vulnerable to malware, ransomware, and viruses due to its strict user privilege model.
+4. Absolute customizations. As Linux comes under open source users can change the components, add the visual layouts, and modify the commands and there are no legal issues.
+5. Hardware longevity. Linux is very, very lightweight and can run on any kind of hardware. You can use very basic hardware like a Raspberry Pi or any other hardware and we can run the Linux operating system there.
+
+=============
+
+Connectivity : 
+
+(WINDOWS / LINIX / MACOS)
+
+Option 1 : Browser based connect : Choose instance, Click on connect, choose "In web browser", select "EC2 Instance Connect", then click on connect. 
+* Your SG must be open Anywhere.
+* Browser pop-up should not block
+* WE DONT USE THIS OPTION IN REAL ENVIRONMENTS. 
+
+----------
+
+Option 2 : (WINDOWS / LINIX / MACOS)
+
+search for "cloudshell", and from action, choose "upload file", Upload the Keypair required/associated with instance. 
+
+run chmod 400 command to remove public readable permission. 
+then you can connect to instance using below command
+
+ssh -i <keypair-name> <username>@<public-ip/public-dns>
+
+----------
+
+Option 3 : LINUX / MACOS 
+
+We can use OS default terminal, Open terminal, Navigate to the location where we have keypairs.. 
+
+Then, run chmod 400 <keypair>
+then after.. ssh -i <keypair> <username>@<public-ip>
+
+whoami
+hostname
+
+----------
+
+Option 4 : Windows : Command prompt / Powershell
+
+--> open "cmd" type "ssh"
+
+If your command prompt says `SSH` is not a recognised command, then you need to perform the below steps:
+1. Open Settings, go to System, then "Optional features".
+2. Under Features click on "View features" next to "Add an optional feature," then install "Open SSH Client" --> next --> install.
+
+
+linux: chmod 400 keypair
+Windows: 
+
+icacls "C:\path\to\your\keypair" /inheritance:r
+icacls "C:\path\to\your\keypair" /grant:r "$($env:USERNAME):(F)"
+
+----------
+
+Option 5 : WINDOWS, LINUX, MACOS
+
+Install git tool in your laptop.
+
+git-scm.com.. You an use git bash to connect to linux instance...
+
+----------
+
+Option 6 : We can use putty tool to connect. 
+
+Download and install putty tool.  ** THis tool wont work in MacOS
+
+
+Provide public IP.
+Connection --> SSH --> Auth --> Credentails --> Browse the ppk file and connect. 
+
+
+Putty dont support .pem, so we need to conmvert .pem to .ppk using "puttygen"
+
+------------
+
+Option 7 : 3rd party tool named: mobaXterm
+
+
+========================================================================================
+
+
+D: 29/08/2026
+
+An EBS snapshot is basically a point-in-time incremental "backup of an EBS (Amazon Elastic Block Store) volume". 
+
+Can I see what files we have inside a snapshot? 
+Answer:  NO. If you want to see the files, you create a volume attached to any of the instances, then only we can view the files. 
+
+
+Q: we have an existing unencrypted EBS volume. How will you convert it to an encrypted one? 
+Ans: we don't have a direct option to modify an EBS volume and enable encryption. There is no direct setting. We have a workaround:
+1. We need to create a snapshot of an unencrypted EBS volume.
+2. We can create a volume from the snapshot.
+3. While we are creating the volume we do have an option to enable encryption.
+4. Once we have created a volume with encryption enabled, we can attach this volume to an existing instance and we can detach the old one.
+5. Once data verification, validation, and basic sanity checks are completed, we can delete the old unencrypted volume.
+
+
+
+
+/dev/nvme1n1
+
+sudo file -s /dev/nvme1n1
+
+sudo mkfs -t xfs /dev/nvme1n1
+
+sudo mkdir newvol
+
+sudo mount /dev/nvme1n1 /mnt/newvol
+
+cat /etc/mtab | grep nvme1n1
+
+/dev/nvme1n1 /mnt/newvol xfs rw,seclabel,relatime,inode64,logbufs=8,logbsize=32k,sunit=8,swidth=8,noquota 0 0
+
+sudo vim /etc/fstab
+
+
+Q: we have an EC2 instance in AP South 1a. It has a volume with a lot of data. We need the entire data for another EC2 instance in another availability zone or the instance may be in another region. What is the process? 
+Ans: as both EC2 instances are in different availability zones or different regions, we don't have a direct option to detach and attach. We cannot even use the copy volume option as they are in different regions.
+1. We have to create a snapshot.
+2. We have to create a volume from the snapshot.
+3. If another instance is in the same region but another availability zone, we need to create the volume from the snapshot. If another instance is in another region, we need to copy the snapshot.
+4. We need to create the volume.
+5. We can attach it to the instance.
+
+=================
+
+RTO : Recovery Time Objective : 
+Question : How long we can be offline. / How much downtime offord.
+Meaning: Downtime limit
+Focus: Recovery speed
+Example : if our RTO is 4 hours, we must have our systems up and running with in 4 hours. 
+
+
+RPO : Recovery Point Objective : 
+Question : How much data loss we can afford.?
+Meaning: Data loss limit
+Focus: Backup frequency
+Example: If our RPO is set to 4 Hr, you must have backup configured for every 4 Hr.
+
+
+DLM : Data Lifecycle Manager : 
+
+We don't have any option to directly pick the volume or instance. We have to choose tags for filtering the resources. 
+
+We do have an option to filter resources and create backups by using an instance-level tag or an individual volume-level tag. 
+
+
+Q: explain your EC2 instances' backup strategy. 
+Ans: we are using the AWS DLM (Data Lifecycle Manager) service to take backups of our EBS volumes. We are not using any third-party applications. We have a compliance standard: for every resource we create in EC2 we must add an environment tag. We are using that environment tag to filter the resources with DLM. For example whenever we are configuring it in the production environment as per our requirement, we have configured a backup frequency of every 4 hours. We also have a retention policy: we are retaining resources for 4 days in the production environment and 2 days in the non-production environment. 
+
+Service.?
+Resource Filter.?
+Frequently.?
+Retention.?
+
+============================================================
+
+D: 31/08/2026
+
+Requirement : we need 10 EC2 instances with some customizations. Based on our organisational requirements all the EC2 instances should have some standard applications or software. We want to have all those in the 10 EC2 instances we are going to launch. 
+
+--> Custom user creation with username, password
+--> Packages : tree, httpd, telnet
+--> Addl EBS Volume
+--> OS hardening
+
+Option 1 : Lanch 10 instance and install/configure 10 instances. (activity x 10)
+Option 2 : Launch 1 instance and configure everything, Then create a goldenAMI, then launch n number of the instance.  (activity x 1)
+
+
+OS Hardening : it's a cybersecurity process of securing an operating system by reducing the attack surface. 
+By default a lot of operating systems come with a lot of broader settings. We have to narrow down those default settings:
+- We can remove preinstalled software.
+- We can close some ports.
+- We can disable some of the service accounts.
+- Enforcing leasy privulages mechanism
+- Disabling unused ports and services
+- Enfoircing password complexity, Restrict root user access
+- Installing auditing softwares (rsyslog, auditd)
+
+CIS or Lynis can help us to identify the areas we need to focus.
+
+
+checklist: 
+1. Need custom user with pwd, sudo permisisons : yes
+2. Install packages : telnet, tree, httpd : yes
+3. addl volume, perm mount : yes
+
+---
+
+Instance Termination Protection : to protect our instances from accidental terminations 
+
+Instance Stop Protection : to protect our instances from accidental stops 
+
+If you want to terminate an EC2 instance, termination protection and stop protection must be off. Only then can we terminate the instance. 
+
+Shutdown behaviour : what should happen to our EC2 instance when we initialise a shutdown of the operating system from the OS level? 
+We have two options: (This will have the highest priority. It will override instance stop and termination productions.)
+1. Stop
+2. Terminate
+
+---
+
+EIP : Elastic IP : it's a dedicated public IP address for our EC2 instance.
+
+In general if we perform a stop and start operation, the instance will get a new public IP address. To have a fixed generated elastic IP address, then attach it. 
+
+reboot : Pubic ip wont change
+stop and start : public ip will change
+
+=====================================================================================
+
+D: 01/09/2026
+
+
+EFS : Elastic File System : Shared storage for multiple instances. 
+
+
+EFS works with the NFS protocol. NFS means Network File System. The port number is 2049. 
+--> We can use EFS to mount to EC2 instances across multiple availability zones. 
+--> No pre-provisioned size or storage for EFS. 
+--> With EFS we will have unlimited storage. 
+--> We can mount EFS storage to hundreds/thousands of EC2 instances. 
+
+
+Purposes: 
+Web Hosting
+Shared Storage across instance
+Centralised backup
+
+Pre-Req: create a security group for EFS. Open port 2049. 
+
+WebServer-SG		--> EC2 instances SG
+
+Option 1 : Open port 2049 and set source as custom and choose "web-sg". *****
+
+Option 2 : Attach "DefaultSg" to your ec2 instances and EFS also. (Default SG is loopback SG : point all traffic to itself)
+
+Option 3 : Open EFS for Entire VPC CIDR Range. (d vpc: 172.31.0.0/16). (not just webservers, other servers in VPC also can access EFS data)
+
+Option 4 : grab Ec2 instances Private IPs.. and Add it to EFS SG.. 
+
+Option 5 : Open EFS for everyone.. Not at all recommened option.. 
+
+
+
+sudo dnf install httpd -y
+sudo systemctl enable httpd --now
+
+Default Document root Path: /var/www/html/
+
+Attach via DNS : Can resolve across AZs. 
+Attach via IP : limited to specific AZ.
+
+
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-062ad98f818ba71b0.efs.ap-south-1.amazonaws.com:/ /var/www/html/
+
+cat /etc/mtab | grep fs-062ad98f818ba71b0
+
+
+===============
+
+userdata : user data helps to execute commands when an instance is launched for the first time. Below are the points:
+1. User data executes commands as a root user.
+2. The script size should not exceed 16 KB.
+3. Output logs are generally stored in /var/log/cloud-init-output.log.
+4. AWS uploads the script to instance path : /var/lib/cloud/instances/<ins-id>/user-data.txt
+5. This script execute only onetime, when instance is launched. If you want to execute any commands for every reboot use cloud-init (or) cronjob with @reboot option
+
+#! : Initilise as a script
+/bin/bash : bash execution
+
+#!/bin/bash
+sudo dnf install httpd -y
+sudo systemctl enable httpd --now
+echo "<h1>This is my userdata website</h1>" >> /var/www/html/index.html
+
+============================================
+
+D: 02/09/2026
+
+https://aws.amazon.com/cli/
+
+aws --version
+
+aws configure
+
+Never store your access key in plain text, in a code repository, or in code.
+Disable or delete access keys when no longer needed.
+Enable least-privilege permissions.
+Rotate access keys regularly.
+
+
+aws configure							==> Profile: default
+AccessKeyID: 
+SecretAccesskey:
+Default Region : ap-south-1
+Default Output format: json/table/text/none
+
+
+Above configuration stores in plain text format in our laptop.. 
+
+c:/users/administrator/.aws
+
+mac: cd ~
+
+
+--dry 		: This performs a command simulation not actual execution. It's best practise to run it before the actual execution. 
+
+--debug		: This helps us to identify the issue with respect to the connectivity or the permissions. This displays everything happening in the backend. 
+
+
+sts : Security Token Service : this service generally helps to issue temporary tokens when we are using AWS CLI or login. 
+
+
+aws sts get-caller-identity				: Displays as what user you are working
+
+
+any command syntax: 
+
+aws <service-name> <command> <arguments>
+
+
+aws ec2 describe-instances --region ap-south-1
+
+aws ec2 start-instances --instance-ids i-0293be105f083b1b7 --region ap-south-1
+
+aws ec2 stop-instances --instance-ids i-0293be105f083b1b7 --region ap-south-1
+
+---------
+
+profile : this feature helps us to access multiple AWS environments from one device. 
+
+aws configure --profile dev
+
+AccessKeyID: 
+SecretAccesskey:
+Default Region : ap-south-1
+Default Output format: 
+
+aws configure --profile uat
+aws configure --profile prd
+
+----------
+
+Problem with AWS CONFIGURE : credentials are going to be stored in plain text format on our laptop. These credentials won't rotate automatically. We manually need to rotate them. There is a high chance of getting this stolen. 
+
+=======================================
+
+aws login : this is a newer and recommended way to access AWS environments. The advantage is temporary credentials. 
+
+Pre-Requisite: make sure the user who want to use this feature, should have a policy
+PolicyName: SignInLocalDevelopmentAccess
+
+Session duration: 12 hours
+Temp token expiration : 15 Min
+
+AWS login stores temp token : "~/.aws/login/cache/xxxx.json" with expiration period.
+
+---
+
+if you have any machiene without UI/browser, you can use: 
+
+aws login --remote
+
+aws login --profile dev
+aws login --profile uat
+
+=======================================
+
+Try switch role option..
+
+======================================
+
+D: 03/09/3036
+
+Monitoring : cloudWatch service will monitor our AWS resources. 
+o11y : observability : SRE : so it can look into the logs, it can identify the issue, it can verify the traces, and it can alert the user. 
+
+By default CloudWatch will provide metrics for the below resources:
+- CPU
+- network in and out
+- disc read and write operations
+- status checks
+
+CloudWatch default metrics have a limitation: they cannot monitor the following resources:
+- memory/RAM metrics
+- disc metrics
+- custom application
+
+CloudWatch has two types of monitoring:
+1. Basic monitoring : monitoring or graph update interval is 5 minutes. 
+2. Detailed monitoring : monitoring interval will reduce to 1 minute. It will cost us. Also, We don't get any additional graphs. 
+
+lets add load on our ec2 instance
+
+cpu load: stress --cpu 2 --timeout 120
+memory load : stress --vm 2 --vm-bytes 512M --timeout 120
+
+Alarm Creation: 
+Metric : CPU Usage, Network, Disk usage, Memory
+Threshold : TIme period : CPU usage is exceeding its % of usage for a period  (5 min or 15 min..)
+Action : Do you want to perform any activity automatically (stop / reboot / terminate / recorvery).. 
+Notification : We can send Email alerts using SNS (Simple Notification Service).. 
+
+---------
+
+Dashboard : I have multiple resources for a project. I want to monitor all those resources from a centralised location then we can create a dashboard. We can pick the required metrics from multiple resources, like:
+- EC2 instance CPU
+- S3 bucket size
+- S3 bucket object count
+- database CPU usage
+- database memory usage
+
+--> We do have an option to share this dashboard securely with a username and password or we can even make it public. 
+
+---------
+
+Step 1 : Create an IAM role and attach role to ec2 instance. Make sure role has below policies.. 
+- CloudWatchAgentServerPolicy
+- AmazonSSMManagedInstanceCore
+
+Step 2 : Install apache / nginx
+
+sudo dnf install httpd -y
+sudo systemctl enable httpd --now
+sudo systemctl status httpd 
+cd /var/www/html/
+sudo vim index.html
+
+Application Logs location:
+
+/var/log/httpd/access_log
+/var/log/httpd/error_log
+
+
+Step 3 : Install cloudwatch agent
+sudo dnf install amazon-cloudwatch-agent -y
+
+
+Step 4 : Configure the agent
+
+4.1 cloudwatch look for configuration file in below location. file name should be "config.json"
+/opt/aws/amazon-cloudwatch-agent/bin
+
+4.2 refer the config file and create a file in the path with name config.json
+
+4.3 Inform cloudwatch agent to fetch config from ec2 local.
+
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:///opt/aws/amazon-cloudwatch-agent/bin/config.json -s
+
+sudo systemctl enable amazon-cloudwatch-agent --now
+
+sudo ./amazon-cloudwatch-agent-ctl -a status
+
+
+==================================
+http status codes:
+
+2xx	: ok/success
+3xx	: redirection
+4xx	: Client side error
+5xx	: Server side error
+
+
+Interview: see how you can monitor EC2 instance custom metrics like memory utilisation and disc utilisation. When disc usage is a bit low, how can we send alerts? 
+Also, we have an application running inside an ACI instance. That application is generating a lot of errors so we need to track those errors, identify the error, and whenever the errors are generated a bit more for a particular period, we should get an alert. How can we design the solution? 
+
+====================================
+
+EventBridge: Event Bridge is a serverless fully managed event bus service that enables us to perform two kinds of processes:
+1. Event-driven processes
+2. Scheduled processes
+
+EventDriven Processes: 
+- When an EC2 instance is stopped, get a notification.
+- When a user deleted a user or created a user, get an alert.
+- When an object is uploaded to an S3 bucket, invoke a Lambda function that can start subsequent processes.
+
+Scheduled Processes: 
+- Every day at 8 am, start an EC2 instance.
+- Every day at 6 pm, stop the same EC2 instance.
+- Every 10 minutes, invoke a Lambda function that can process a batch job.
+
+
+Event: it describes the change in state and an event will be generated in JSON format. 
+EventBus: the channel through which the event actually flows. we have i.e; default, custom, partner. 
+Rule: defines which events to match and where to send them. 
+
+
+Input Transformer: reshape the event before it is sent to the target. 
+Input Path: You pick desired info
+Input Template: Use Input Path info and build your own message.
+
+---
+
+Requirement 1 : whenever an EC2 instance changes its state to stopped or stopping, send an alert to an SNS topic. 
+
+Event Pattern:
+{
+  "source": ["aws.ec2"],
+  "detail-type": ["EC2 Instance State-change Notification"],
+  "detail": {
+    "state": ["stopping", "stopped", "terminated"],
+    "instance-id": ["i-02883352bd206aa06"]
+  }
+}
+
+
+event:
+
+{
+  "version": "0",
+  "id": "a80d7ff6-8e1c-a1c1-dff7-fe7ad9745f24",
+  "detail-type": "EC2 Instance State-change Notification",
+  "source": "aws.ec2",
+  "account": "992189742322",
+  "time": "2026-09-04T02:34:59Z",
+  "region": "ap-south-1",
+  "resources": [
+    "arn:aws:ec2:ap-south-1:992189742322:instance/i-02883352bd206aa06"
+  ],
+  "detail": {
+    "instance-id": "i-02883352bd206aa06",
+    "state": "stopped"
+  }
+}
+
+
+Input Path:
+
+{
+  "instance-id": "$.detail.instance-id",
+  "state": "$.detail.state",
+  "region": "$.region",
+  "account": "$.account",
+  "time": "$.time"
+
+}
+
+
+Input Template:
+
+"At <time>, In my account: <account>. \nAn ec2 instance <instance-id> in <region> region is changed its state to <state>"
+
+
+----
+
+When anyone opens port 22 or 3389 anywhere, we should send an alert immediately. 
+
+When anyone modifies an existing policy send an alert. 
+
+When anyone makes any S3 bucket public, we should get an alert immediately. (optional)
+
+=======================================================================================
+
+D: 07/09/2026
+
+
+Systems Manager : *CloudOps Exam Important Topic..
+
+If you want to manage any EC2 instance using Systems Manager, we should add this policy to the instance attached to the IAM role: "AmazonSSMManagedInstanceCore"
+
+
+configmap (k8s) : less sensitive information	: Parameter store : Static/Fixed
+Secrets (k8s) : More sensitive info				: Secrets Manager
+
+Secrets Manager: THis cred can be rotated automatically periodically.
+
+
+---
+
+Cluster PG : packs instances close together on the same physical rack within a single availability zone. We can use this for tightly coupled applications for ultra-low latency and high network throughput. 
+
+Partition PG : divides the instances into logical partitions. Instances in one partition will not share hardware with instances in another partition. We get fault isolation at the partition level. 
+
+Spread PG : strictly separates each individual instance into its own physical hardware rack, power connectivity, and network paths. A small group of critical servers we can launch in a spread placement group. We get maximum fault tolerance here.  
+
+==============
+
+D: 12/09/2026
+
+Instance store volumes:  are also called ephemeral storage. Our EC2 instance is going to use the underlying host's storage. 
+We have disadvantages with instance store volumes. 
+--> Due to any reason if our EC2 instance is stopped and started, we will lose all the data. 
+--> For the reboot operation we are not going to lose all the data. 
+--> That is why we don't prefer to run our workload with instance store volumes. 
+
+We always use "EBS volumes" over instance store volumes. 
+
+----
+
+Hypervisor : ESX-i, Hyper-v, KVM, XEN, Nitro... 
+
+Type 1 : Bare-Metal Hypervisor.. : EC2
+It installs directly on the physical server's hardware and acts as a lightweight operating system itself. This offers maximum speed and efficiency because there is no intermediate operating system layer. At the enterprise level we use this. 
+
+
+Type 2 : Hosted Hypervisor.. It runs as a regular software application on top of our host operating system, like Windows, Mac OS, or any Linux. It has slightly lower performance because all requests have to pass through the host operating system first. We can use this on our personal laptops for our local developments. 
+
+OracleVM VirtualBox, VMWare Workstation...
+
+
+---
+
+FedRAMP : Federal Risk and Authorization Management Program
+PCI DSS : Payment Card Industry Data Security Standard 
+HIPAA : Health Insurance Portability and Accountability Act  (PHI : Protected health information.)
+GDPR : General Data Protection Regulation 
+
+---
+
+Tenancy Options in ec2: 
+
+Share tenancy:  Underlying hardware will be shared with multiple customers. This comes at a low cost.
+
+Dedicated Tenancy : underlying hardware will be allocated to one customer only and will not be shared with any other customer. 
+
+1. Dedicated Instance : we get an individual instance, small in terms of size compared to the host. 
+2. Dedicated Host : we can run multiple instances on a host. We will get an option to apply licences to underlying instances, sockets, or hardware. 
+
+---
+
+Status checks on EC2 Instances : 
+
+1. System Status check : system status check monitors the underlying physical host and its power and network connectivity. 
+--> To fix this issue simply perform a stop and start on the instance so the instance will move or look for another healthy host. 
+
+2. Instance Status check : Instance status check monitors the underlying operating system, network configurations, and kernel configurations of the instance. 
+--> To fix this issue:
+1. Reboot the instance.
+2. Check system logs.
+3. Look for configuration errors.
+4. If you have any most recent backup copy of the root volume, perform "replace root volume".
+
+3. EBS Status checks : check the EBS volume status and look for connectivity issues between EC2 instances and EBS volumes. 
+
+4. Application Status Check : newly introduced one: we can configure status checks for an application running inside our EC2 instance. We can define a custom health check path. If the service is not running, the application is not delivering and it fails. 
+
+---
+
+NIC : Network interface Card : a connector that establishes connectivity to the external world either by using a wired method with RJ45 or a wireless method with Wi-Fi 802.11 b/g/n. 
+
+ENI : Elastic Network Interface : NIC card for our ec2 instance.. 
+
+
+
+
+
+
+
+

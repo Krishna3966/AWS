@@ -1,0 +1,364 @@
+
+NIST : 
+Cloud Computing : 
+
+
+AWS Global Infrastruture: 
+
+39 regions Across the globe as of today i.e; August 7th..
+
+Region: No technical definition for word called region.. its just physical location, AWS segregated entire world into different locations.. 
+
+Availability Zone : A distinct location within a region that's designed to be isolated from failures in other Availability Zones. Availability Zones within a region are connected through low-latency links. 
+Data Center or combination of Multiple DCs.. 
+
+PoP location / Edge locations : These are cached location or CDN (Content Delivery Network) locations.. 
+750+ Edge locations.. 
+
+
+windows: tracert google.com
+Linux: traceroute google.com
+ping google.com			
+
+=============================
+
+https://aws.amazon.com/free
+
+
+Account Creation success: 100$
+
+You perform 5 activities: 5 x 20$ = 100$
+
+Validity: 6 months
+
+
+Step 1 : Sign up for AWS
+
+Root user email address : your-email-address
+AWS account name : avinash-dev, avinash-sandbox
+
+Verify Email Address : your-email-address : ENTER CODE
+
+Setup a strong password
+
+
+Step 2 : Account Type 
+
+--> Personal (or) professional				===> Choose Personal
+--> Enter Your personal information
+
+Step 3 : Payment Page
+
+--> You can use UPI, credit Card, Debid Card
+--> 2 INR will be deducted and credit back to your acocunt
+
+** Until unless, you click on upgrade plan, You wont get charged anything. 
+
+
+Step 4 : identity proof and phone verification.
+
+aadhar / PAN / Passport / Driving License upload as PDF.. 
+phone number : call / SMS
+
+Step 5 : Choose Support plan
+
+
+1. Account and Billing related: activation and billing..
+2. Technical Assistance : Technical help from AWS
+
+
+Basic Support Plan : 
+--> Every account get this by default
+--> 24/7 access to AWS AI First Troubleshooting.. Re:Post, Amazon Q, Amazon Kiro CLI, AWS Documentation..
+--> Account and Billing related issues, 24x7 support from AWS
+--> Limited Trusted advisor checks
+--> No Technical Assistance from AWS Engineers team. 
+
+Developer Support Plan: Discontined
+
+Business Support Plan : Starts from $29/Month.. 
+--> Minimum support plan AWS recommend us for our workloads. 
+--> AI powered 24/7 Support
+--> Account and Billing related issues, 24x7 support from AWS
+--> 24x7 technical assistance from AWS.
+--> FUll Trusted advisor checks
+--> Critical Case Response: < 30 Minutes
+
+Enterprise Support Plan : Starts from $5000/Month..
+--> Recommended support plan AWS recommend us for our Business critical workloads. 
+--> AI powered 24/7 Support
+--> Account and Billing related issues, 24x7 support from AWS
+--> 24x7 technical assistance from AWS.
+--> FUll Trusted advisor checks
+--> Critical Case Response: < 15 Minutes
+--> We get a TAM (Technical Account manager)
+--> Annual AWS Account Reviews and Architectural Reviews
+
+
+Unified Operations Support Plan : Starts from $50,000/Month..
+--> Recommended support plan AWS recommend us for our Missions critical workloads. 
+--> AI powered 24/7 Support
+--> Account and Billing related issues, 24x7 support from AWS
+--> 24x7 technical assistance from AWS.
+--> FUll Trusted advisor checks
+--> Critical Case Response: < 5 Minutes
+--> We get a TAM (Technical Account manager)
+--> Annual AWS Account Reviews and Architectural Reviews
+--> We get Assistance from AWS SMEs (Subject Matter Experts)
+--> TAM + DOmain Specialist + SME + Incident Management
+
+
+Case Severity: 
+General Guidence : < 24 hrs
+System Impaired: < 12 hrs
+Production System impaired: < 4 hrs
+production System Down: < 1 hr
+Business critical system down: < 15 Min
+Mission Critical business system down: < 5 Min
+
+=============================
+
+D: 10/08/2026
+
+Root user: Account owner that performs tasks requiring unrestricted access.
+
+Root user will have unrestricted access. He can perform anything on this account (i.e; changing billing info, closing account).. 
+
+** AWS always recommend to enable MFA (Mult Factor Authentication) on our root account.
+
+
+---
+
+Adjust the AWS account Password settings, So all the users are enforced to use the same standard password polocies. 
+
+---
+
+Sign-in URL for IAM users in this account : https://828477980115.signin.aws.amazon.com/console
+
+Setup an alias for AWS account id, So we can use either ID / alias name. 
+
+https://avizway8.signin.aws.amazon.com/console
+
+---
+
+We have 2 types of AWS access:
+
+1. AWS management Console : Username, Password and Sign-in : Browser
+2. Programatic Access : AccessKey and SecretAccess key : CLI, Programatic, SDK, CDK.. : Later
+
+---
+
+IAM User : 
+
+Step 1 : Setup username
+--> Enable AWS Management console access
+--> Auti generating the password
+--> Enforcing to setup new password when login for the first time.
+
+Step 2 : Allocating policy
+
+policy: Set of permissions on our aws account.
+
+
+
+https://avizway8.signin.aws.amazon.com/console
+avinash
+Qt$d9IE1&9
+
+
+S3 : Simple Storage Service : AWS Version of Google Drive.. THis service designed to store objects (i.e; images, videos, documents)..
+
+EC2 : Elastic Compute Cloud : We can launch, run and manage servers. 
+
+RDS : Relational Database Service : Service to run databases for our applicaitons (mysql, postgresql, mssql)
+
+----
+
+
+Authentication : You can authenticate to an account (AWS/Gmail) using valid credentials (username and password)
+
+Authorisation : Are you allowed to perform this operation this operation.?..  
+
+----
+
+Least Privilages Mechanism: Allow user to perform activities based on his job role. (No Addl permisisons that he really required to perform his job)
+
+DBA : This team need permisisons on : RDS Service
+Storage : This team need permisisons on : S3 Service
+Network : This team need permisisons on : VPC Service
+User Management : This team need permisisons on : IAM Service
+
+
+Administrator Access : Provides full access to AWS services and resources.  
+--> Similar to root user, but no permisisons on Account and Billing management. 
+
+Poweruser Access : Same as Administrator Access, But no permisisons on IAM Service. 
+
+
+===============================
+
+D: 11/08/2026
+
+
+Polocies : A JSON document contians set of permisisons on our AWS account. 
+
+AWS Managed policies : Based on Available servcies.. (iam full access, s3 read only access, ec2 full)
+AWS Managaed - Job Function : Based on standard jobs we have in market.. (i.e; DBA, network Admin)
+Customer Managed : Based on our requirement, we can create.. 
+
+** We cannot modify / Delete AWS managed polocies. 
+
+----
+
+IAM users max: 5000
+Groups per user : 10
+IAM ROles : 1000
+Managed policies: 1500
+
+IAM User can be member of 10 groups only
+IAM user can have 10 managed polocies directly.
+
+
+----
+Requirement 1 : I need an IAM User, we can access S3 and EC2 services.
+
+req1-awar11
+
+Created a user and allocated S3 policy and Ec2 policy to the user. THis user can access only S3 and Ec2 service, technically, we call this as implicit allow. Remaining all the services will be denied. 
+
+------
+
+Requirement 2 : I need an IAM user who has access on all the aws services, but not on S3 service.
+
+req2-awar11
+
+
+E : Effect : Allow / Deny			: Deny
+A : Actions : s3:* 					: Everything on S3
+R : Resources : *					: All resources
+
+ARN : Amazon Resource Name : This gives uniqueness to the AWS component.
+
+
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Deny",
+			"Action": "s3:*",
+			"Resource": "*"
+		}
+	]
+}
+
+
+
+Explicit Deny: Explicitly we are denying S3, So DENY will have highest priority always. 
+(User level, Group level, Resource level --> DENY will have priority).
+You allow 100 times but deny 1 time at any level --> DENY takes effect.
+
+
+================
+
+Requirement 3 : I need an IAM user who has access on all the aws services, but there is one particular bucket, bucketname: avinash2807, THis user should not able to delete the object.
+
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Deny",
+            "Action": [
+                "s3:DeleteObjectVersion",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::avinash2807/*"
+        }
+    ]
+}
+
+=================
+
+D: 12/08/2026
+
+
+Requirement 4 : I need an IAM user who need full access on s3 service. 
+--> S3 should be accesable when the user is in corporate network only.
+
+https://checkip.amazonaws.com/
+
+49.206.56.39/32
+
+
+--------------
+
+MCP : Model Context protocol : 
+
+------
+
+inline policy : Alligned to one particular entity. 
+--> When an existing user reached maximum policy limits.
+--> You need a policy only for one user, no reusability required.
+
+Problem: Its hard to track. 
+
+==============================
+
+D: 13/08/2026
+
+
+IAM Policy : What permissions are granted.				: s3fullaccess
+Permissions Boudnary : Maximum permissions allowed.		: s3fullaccess
+
+----
+
+Q: Someone deleted an S3 bucket, We need to identify, who performed it.!!
+
+--> To track IAM user activities / AWS activities, We can depend o Cloudtrail service.
+
+Cloudtrail : 
+
+Enabled by default.. 
+--> By Default, it will store last 90 days activities.
+--> We can create trail and store logs for unlimited days (S3 / Cloudwatch logs).
+--> We can use default filters to search user activities.
+--> We cannot alter / delete the logs in cloudtrail.
+
+--> IAM is a global service, You cannot find IAM servcie logs in regular regions.
+--> All IAM / Other global service logs stores in "N.Virginia" only. 
+
+----
+
+Access Analyser: 
+
+External access findings: Identify resources shared with an external entity
+
+Internal access findings: Identify internal IAM users and roles that can access specific resources
+
+Unused access findings: Identify IAM users and roles with unused access
+
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

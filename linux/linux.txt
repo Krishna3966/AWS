@@ -1,0 +1,1143 @@
+
+
+Linux: Linux is a free open-source operating system based on Unix. It is created by Linus Torvalds and first released in 1991. Linux is used almost everywhere, like servers, desktops, mobile phones, cloud, and even iOS devices also. 
+
+While Linux is free, secure, stable, flexible, fast, and community-driven 
+
+Open Source: open source means the source code is freely available for anyone to view, modify, and share. 
+Just like Linux, there are some open-source software examples: Apache, MySQL, and Kubernetes are open source. 
+
+Popular Distros:
+general Purpose			: Ubuntu, linux mint, fedora
+Enterprise Servers 		: RHEL (Redhat), SuSE, oracle, Amazon Linux
+Community Server		: CentOS, Alma Linux
+Security Testing		: Kali Linux, Parrot OS
+Lightweight / container	: alpine, bookwarm, puppylinux, trixie
+
+
+How OS boots:
+1. Hardware Initialisation. 
+	1.1  When we press the power button the motherboard's firmware, like BIOS or UEFI loads.
+	1.2. It runs a POWER ON SELF TEST (POST) to check the crucial hardware like RAM, CPU, and storage. Uses primary boot device. 
+
+2. Boot Sector: Firmware looks for execution instructions from the storage disc partition layout. 
+
+--> Generally we will have something called the Master Boot Record (MBR) and 
+--> In recent devices we are getting something called EFI or UEFI. It bypasses the entire MBR thing and reads execution files directly from storage partitions. 
+--> This boot sector primarily finds and runs the primary boot loader. 
+
+3. Bootloader (GRUB2)
+
+--> Grand Unified Bootloader (GRUB) is the most common software responsible for loading our operating system. It displays a splash menu for users to select an operating system or kernel version if they have configured multiple operating systems. 
+
+Otherwise it picks a default operating system and it loads. 
+--> In the backend it loads the Linux kernel image from vmlinuz and the initial RAM file system (initramfs) into system memory. 
+
+4. Lunux Kernel: 
+--> It acts as a translation layer and bridge between user software applications and the physical computer hardware, like a CPU, memory, and devices. 
+
+5. Initialisation System (systemd) : the kernel executes the initialisation daemon as the very first user-space process, granting it a process ID. Systemd acts as a master controller, reads the configuration target files, and spins up required processes concurrently. 
+
+
+RunLevels: 
+init 0 : shutdown								--> systemctl poweroff
+init 1 : Single user mode
+init 2 : multiple user mode with no network
+init 3 : multiple user mode with network
+init 4 : user-defined (blank by default)
+init 5 : Full Desktop Mode
+init 6 : Reboot									--> systemctl reboot
+
+
+In linux OS, Everything starts from "/"
+
+/bin 	: Binary Executables : Contains all essential binary files used by all users. 
+
+/boot	: Boot loader files : Linux kernel and boot loader and support files
+
+/root	: home directory for root user  (c:/users/Administrator)
+
+/home	: Home directory for regular/non-root users..
+
+/dev	: Device files : Contains all attached hardware realted files i.e; hdd, nic (windows device manager)
+
+/etc	: Configuration files (Editable Text Configs) : /etc/passwd, /etc/httpd/conf/httpd.conf
+
+/var	: variable files : Contains data that changes frequently (logs, database, web content)
+
+/sbin	: system binaries : it primarily stores essential executable files used for system administration, maintenance, and reboot tasks. 
+
+/mnt	: We can use this path to mount the devices (hdd)
+
+/tmp	: temporary location
+
+/usr	: user programs : contains user level programsn and libs. 
+
+
+/proc: Process inforamtion
+/lib : similar to windoes .dll files
+/media : removable media
+
+
+cd 		: Change Directory
+cd /	: Takes us to / path
+cd ..	: Take us to one step back in the path
+cat 	: We can read info from document.
+ls		: List files/directories 
+pwd		: Print Working Directory
+whoami	: Tells us as what user we are working
+
+touch <filename>
+
+touch		--> Create a zero byte file
+ls -a		--> List everything including hidden
+
+
+===============================
+
+D: 20/08/2026
+
+Launch Template : A launch template can help us to configure settings for our EC2 instance that we launch multiple times. 
+
+We do not need to manually launch instances with the same settings every single day. You configure all the settings once and you can use a launch template. 
+It gives all same settings whenever we are launching a new instance. 
+
+
+mkdir			: Command to create a durectory
+
+mkdir songs
+mkdir videos
+
+cp				: Copy and Paste
+
+cp s* songs/	: picks all files and dir and copy to songs directory (directory imits here)
+
+cp -r <dir> <dir>	: Copy entire directory to another directory
+
+mv <file> <path>	: Cut and Paste
+
+mv dir/ dir/		: Move a directory to another directory
+
+mv dir/* dir/		: pick all files from source dir to moves to target dir
+
+mv v* dir/			: pick all the files name starts with v and move.
+
+mv oldname newname	: MV also helps to rename
+
+
+------
+
+rm					: Remove or Delete operation
+
+rm s*				: Delete all the files name starts with s
+
+rmdir <dir-name>	: Works only for empty directory
+
+rm -r <dir-name>	: Recursively delete the directory
+
+rm -rf <dir-name>	: Recursively and Forcefully delete the directory (Be cautious when using it)
+
+rm songs/*			: keeps the directory but delete all files inside the directory
+
+-----
+
+.					: Represent current path
+
+man <command>
+
+cp /etc/passwd .	: copy the passwd file from /etc folder to current location.
+
+cat <file>			: displays all the file content
+
+more <file>			: Displays content page by page. Helpful when working with long text files. (enter - next line ... space bar - Next page)
+
+
+tail 				: Displays bottom 10 lines of the file
+
+tail <filename>		: Displays bottom 10 lines of the file
+
+tail -f <filename>	: Displays bottom 10 lines of the file and continuously stream new updates as they happen.
+
+tail -n 20 -f <filename>
+
+tail -n 20 passwd	: Displays the bottom 20 lines of the file
+
+head 				: Displays the top to lines
+
+head -n 5 passwd	: Displays the top 5 lines of the file
+
+sort passwd			: Sort the file content based on alphabetic order
+
+sort -r passwd		: Sort the file content based reverse alphabetic order
+
+---------------
+
+grep : global regular expression print : helpful command to search text within files..
+
+grep "root" passwd				: search for root work in passwd file. - case sensitive
+
+grep -i "root" passwd			: search for root work in passwd file. - case insensitive
+
+grep "root" file1 file2
+
+grep -r "root" /path			; search the entire path recursively
+
+
+ps aux | grep "ec2-user"
+
+---------------
+
+vim : VI improved Editor : 
+
+text editor: vi, vim and nano
+
+
+vim myinfo.txt
+
+Command Mode : This mode is primarily for navigation and other file operations.
+Insert Mode : Used for entering text into the file.
+
+
+Switch modes:
+Command mode --> press "i" --> You enter insert mode
+Insert mode --> press "esc" --> You enter command mode
+
+To save file and Quit from Editor			:wq
+
+Quit from Editor without saving changes 	:q!
+Ignore the changes and quit editor
+
+
+o			: open a new line below the current line and enter into insert mode.
+
+k			: move cursor one line up
+j			: move cursor one line down
+
+dd			: Delete the entire line where our cursur is placed
+
+
+dd			: cut the lines
+p			: Paste the cut lines at cursor
+
+5dd			: Delete the next 5 lines from the cursor
+100dd		: Delets the next 100 lines from the cursor
+
+:set number	: Add the line number
+:set nonumber	: Removes the line number
+
+nG				: Move cursur to specific line number (n = number)
+10G				: move cursor to line number 10
+
+:undolist		: Shows change history
+2u				: it undo last 2 changes
+
+/word			: search for the word
+
+-------------------
+
+D: 21/08/2026
+
+Repo Configuration: /etc/yum.repos.d (or) /etc/dnf/dnf.conf
+
+--> sometimes we need to add repos to our linux instance, then only we can download and install some packages.
+
+RPM : Redhat Package Manager : it doesn't have the capability to resolve the dependencies automatically. We manually need to download the dependency files as well. 
+
+rpm -ivh package.rpm
+
+YUM : Yellow dog updater modified : Yum is a wrapper around RPM that can automatically resolve dependencies. This has the capability to resolve the dependencies from the listed repositories. 
+
+yum install httpd
+yum install nginx
+
+dnf (Dandified YUM) : all the new-age Linux distributions are already using DNF or switching from Yum to DNF as it has a lot of betterments with respect to dependency resolutions. 
+
+dnf install httpd
+dnf install nginx
+
+dnf search <package>
+dnf info <package>
+
+
+dnf install tree
+
+
+---------
+
+Option 1 : provide Sudo permisisons to the user, so the user can perform activities by placing sudo infront of the command.  
+ec2-user will have sudo permissions by default. So just add "sudo" and execute the command.
+
+sudo dnf install tree			--> Interactive, Manual action required. 
+sudo dnf install tree -y		--> NonInteractive, Pick yes as option and continue installation.
+
+which <comamnd>
+which ls
+which tree
+
+Option 2 : Switch to root user and perform the required installation. 
+
+variable = vary + able
+
+sudo su		: It won't load root user's environment variables. 
+sudo su -	: switch root user with login shell, loads root's environment variables and simulates a fresh root login. This is best for admin-related activities. 
+sudo -i 	: same as "sudo su -", It loads root user's environment variables and automatically moves to /root path. 
+
+dnf install tree -y
+
+------------
+
+
+sudo dnf install httpd -y
+
+sudo systemctl start <service>
+sudo systemctl stop <service>
+sudo systemctl restart <service>
+sudo systemctl stop <service>
+
+sudo systemctl status httpd
+sudo systemctl start httpd
+sudo systemctl stop httpd
+sudo systemctl restart httpd
+sudo systemctl stop httpd
+
+
+sudo systemctl status httpd
+
+
+sudo systemctl enable httpd			--> Starts the httpd service after reboot automatically. 
+
+sudo systemctl enable httpd --now	--> start + enabling statup
+
+ERR_CONNECTION_TIMED_OUT	: The problem is with the security group. You need to open the required port in the security group inbound rules. 
+
+ERR_CONNECTION_REFUSED		: The problem is with the service. Make sure you verify your service is in a running state. 
+
+
+Restart your linux instance: 
+sudo reboot
+sudo init 6
+
+
+run --> services.msc	--> observer "startup type"
+
+DocumentRoot Path: whatever we place here will be delivered as web content. 
+
+apache : /var/www/html/	
+nginx : /usr/share/nginx/html/
+
+cd /var/www/html/
+sudo vim index.html
+
+---
+
+apache configuration path: /etc/httpd/conf/httpd.conf
+
+cd /etc/httpd/conf
+sudo vim httpd.conf
+
+47G
+
+change LISTEN 80 to LISTEN 8080
+
+--> As we did configuration changes, We need to Restart the httpd service
+sudo systemctl restart httpd
+
+http://65.0.61.86:8080/
+
+
+
+--> Apache 8080
+--> nginx 80
+
+=========================================
+
+UBUNTU: 
+
+sudo apt install <pkg>
+sudo apt update
+sudo apt remove pkg
+sudo apt search pkg
+sudo apt show pkg
+
+
+=========================================
+
+
+echo "hello from Aviz"		--> hello from Aviz
+
+>		--> Overwrite		--> Erase existing info and add new info
+>>		--> Appends			--> Adds info to existing lines
+
+
+echo "hello" >> morning.txt
+echo "Good Morning" >> morning.txt
+echo "Its Friday" >> morning.txt
+
+echo "Feeling like a holiday" > morning.txt
+echo "Still we need to work" > morning.txt
+
+echo -e "hello\nfrom\nAvinash"
+
+======================================
+
+D: 22/08/2026
+
+top : this command shows a real-time view of all the running processes.  (press q - exit)
+
+press "P" to sort processes by CPU usage.
+Press "M" to sort processes by Memory Usage.
+
+htop : this is the same as the stop command but with a better UI. 
+By default we don't get it. We need to run `sudo dnf install htop -y` to install. 
+
+sleep 100 &
+
+htop --> f4 --> search with process name
+
+nproc 	--> displays the cpu count
+
+sudo dnf install stress-ng -y
+
+stress-ng --cpu 1 --timeout 120 &
+
+
+ps				: Shows the list of processes attached to the terminal. 
+ps aux 			: a (all users), u (user.owner), x (not attched to terminal)
+
+ps aux | grep sleep
+ps aux | grep stress
+
+
+ps aux --sort=-%cpu | head
+ps aux --sort=-%mem | head
+
+To kill a process we can use the `kill` command but we have two primary signals:
+
+1. Signal 15 : SIGTERM : termination: The default signal sent by the `kill` command to ask a process to save its state and shut down safely. 
+
+2. Signal 9  : SIGKILL : it forcefully terminates the process. If any process is blocking or stopping it from killing it, it will forcefully kill that. 
+
+
+kill 27937		
+kill -9 27937
+
+pstree : this command shows the process tree in a hierarchical manner. 
+
+pidof httpd		: identify the process if
+pgrep httpd		: 
+pkill <p-name>	: kill a process using name (pkill sleep)
+
+nohup			: no hangup : this command allows a command or script to keep running even after you log out, disconnect, or close the terminal window. 
+
+cat /etc/os-release
+
+-----
+
+free
+free -h
+free -m 
+free -g
+watch -n 5 free -h
+
+==================================================================
+
+User Management in Linux OS
+
+/etc/passwd			: user Details
+/etc/shadow			: Encrypted passwords
+/etc/groups			: Group details
+/etc/sudoers		: Cant edit directly, sudo permisisons applied using this file entries.
+
+who					: Shows who all are logged in to this instance. Also displays the user's public IP address. 
+
+id <username>		: shows the user id of root. THis will be always "0"
+id ec2-user 1000
+id avinash 1001
+
+sudo useradd avinash				
+
+sudo useradd -m avinash 						: Create a user along with a home directory. Most of the time a home directory is not required, as it is automatically created. 
+
+sudo useradd -c "linux demo awar11" avinash		: Create a user with a comment. 
+
+sudo useradd -M aravind							: Create a user without a home directory. 
+
+
+sudo passwd avinash							: Set up a password for the defined user. 
+
+su avinash									: switch to avinash user
+
+sudo groupadd developers					: Create a group named developers. 
+sudo usermod -aG developers avinash			: Adding Avinash user to the developers group 
+
+sudo gpasswd -d avinash developers			: Remove Avinash users from the developers group. 
+sudo groupdel developers					: Command to delete the developers group 
+
+
+sudo usermod -aG wheel avinash				: Adding Avinash user to wheel group so he can get sudo permissions. 
+
+cat /etc/group								: View the group and group members. 
+getent group wheel							: View the group and group members. 
+
+
+sudo usermod -L avinash						: Locking or disabling the user 
+sudo usermod -U avinash						: UnLocking or Enabling the user 
+
+sudo userdel avinash						: Delete the user avinash, but keeps the home directory.
+sudo userdel -r anudeep						: Delete the user Anudip along with his home directory. 
+
+================================
+
+D: 24/08/2026
+
+Logging into an EC2 instance by using a custom user with a password 
+
+
+sshd : SSHD is nothing but Secure Shell Daemon. This service helps us to establish connectivity to Linux using the SSH protocol. 
+sssd : System Security Services Daemon. This service provides authentication and identity management for Linux operating systems. 
+
+
+pre-req: setup password for the user
+
+1. ssh configuration : /etc/ssh/sshd_config
+
+at line number 65, change PasswordAuthentication to "yes"
+
+2. cloud-init configuration : /etc/cloud/cloud.cfg
+
+at line number 17, ssh_pwauth to "true"
+
+sudo systemctl restart sshd
+sudo systemctl restart sssd
+
+==============
+
+ls 
+ll
+ls -ll
+
+-rw-r--r--. 1 ec2-user ec2-user 0 Aug 24 02:04 a.txt
+drwxr-xr-x. 2 ec2-user ec2-user 6 Aug 24 02:06 songs
+
+-	rw-		r--		r--
+
+-	: regular file
+d	: directory
+b	: block device
+l	: symbolic link
+
+d		rwx			r-x			r-x			2 	ec2-user	ec2-user	6 		Aug 24 02:06 	songs
+type	owner		group		others			user		group		size	modified	file name
+
+
+
+owner	: o
+group	: g
+others	: o
+
+
+read 	: r : view file content and he can list directories. 
+write	: w : you can edit the file content or create/delete the file inside a folder or directory. 
+execute	: x : we can run that file as a programme or enter the directory. 
+
+octal method permisisons management
+
+read	: r : 4
+write	: w : 2
+execute	: x : 1
+None	: -	: 0
+
+
+7	: rwx	: 4+2+1 : Full Access
+6	: rw-	: 4+2+0 : Read and Write
+5	: r-x	: 4+0+1 : Read and execute
+4	: r--	: 4+0+0	: Read Only
+0	: ---	: 0+0+0	: No Access
+
+chmod 400 keypair
+
+u = read only
+g = no access
+o = no acess
+
+
+getfacl filename
+
+
+
+Scenario 1 : Only owner can get read write and execute
+
+mkdir ~/mypersonal
+
+chmod 700 mypersonal		(700 - full permisisons for user, no permisisons for group and others)
+
+
+Scenario 2 : Team collabaration folder
+
+cd /opt
+sudo mkdir teamproject
+sudo groupadd developers
+
+sudo usermod -aG developers avinash
+sudo usermod -aG developers anudeep
+
+sudo chgrp developers teamproject/
+
+sudo chmod 774 teamproject/
+
+The owner and the developers group can perform any operation in this folder but whoever falls into the others category gets only read permissions. 
+
+
+Scenario 3 : Sticky bit permissions : everyone will have permissions but only the user who created the file can delete it. No other user can delete it. 
+
+sudo mkdir sharedfolder
+sudo chmod 1777 sharedfolder/
+
+==============================
+
+
+variable = vary + able
+
+
+#!/bin/bash
+
+#!	: Shebang : the operating system kernel looks at these two bytes and it will treat all remaining things as commands. 
+/bin/bash		: The absolute path for the Bash interpreter 
+
+
+export NAME=anudeep
+export QUAL=PHD
+
+
+#!/bin/bash
+echo "hello from $NAME"
+echo "My qualification is $QUAL"
+
+
+To add environment variables permanently  : 
+vim ~/.bashrc
+
+source ~/.bashrc
+
+=====================
+
+D: 25/08/2026
+
+Public IP : a public IP address is unique across the globe. Once it is allocated to a device, it won't be allocated to any other device across the globe. 
+
+Private IP : a private IP address is unique within the network. Works only within our network, i.e; intranet 
+
+
+curl https://checkip.amazonaws.com/
+curl https://ifconfig.me/
+
+Shows the network interfaces and Associate IPs..
+ifconfig
+ip addr
+ip -br addr
+
+-----
+
+IMDS : Instance MetaData Service: 
+
+v1 : less secured - SSRF Attack - Server Side Request forgery
+v2 : Secured - It need a token to access the URL
+
+V1: 
+
+curl http://169.254.169.254/latest/meta-data/instance-id
+
+ami-id
+ami-launch-index
+ami-manifest-path
+block-device-mapping/
+events/
+hostname
+identity-credentials/
+instance-action
+instance-id
+instance-life-cycle
+instance-type
+local-hostname
+local-ipv4
+mac
+metrics/
+network/
+placement/
+profile
+public-hostname
+public-ipv4
+public-keys/
+reservation-id
+security-groups
+services/
+
+v2 : generate token
+
+curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"
+
+AQAEAJ9U_98PT1_QqRHi9Hu0-DbbwwzHHzTK316E-7NfhSpxqYRT9A==
+
+export TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 3600")
+
+curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4
+
+curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/network/interfaces/macs/0a:05:70:23:f3:e7/vpc-id
+
+
+==============
+
+curl -o https://google.com/file.txt
+wget google.com
+
+-----
+
+Ping helps to perform the reachability check and latency check. 
+
+ping google.com
+ping <server-ip>	
+
+ping -c 3 google.com
+
+
+ICMP : internet COntrol Message Protocol
+
+To ping and get a response from our AWS-hosted EC2 instance, we need to open ICMP echo request and echo reply in our EC2 instance's associated security groups' inbound rules. Only then do we get a ping response from our EC2 instance. 
+
+-----
+
+To adjust our EC2 instance name we can use the `hostnamectl` command in the Linux operating system. 
+
+sudo hostnamectl set-hostname mywebserver
+
+DNS Configurations in Linux OS:
+/etc/resolv.conf
+/etc/hosts
+
+-----
+
+PORT STATUS VERIFICATIONS: 
+
+netstat (Network Statistics)
+ss (Socket Statistics)
+
+ss
+
+ss -s				: Summerises all socket stats
+ss -tulnp			: Shows currently lstening ports with program names
+
+ss -t state established
+
+sudo lsof -i :80
+sudo lsof -i :22
+
+------
+
+telnet : telnet is a very helpful tool to verify port status and service status on a remote server. 
+
+windows : We have inbuilt optional feature in windows os. (settings, programs --> Addl features --> telnet client)
+
+sudo dnf install telnet -y
+
+telnet google.com 443
+telnet google.com 80
+
+---
+
+Alternative to telnet
+
+openssl s_client -connect hostname:port-num
+openssl s_client -connect google.com:443
+
+-------
+
+HEREDOC
+
+cat <<EOF > fruits.txt
+apple
+banana
+mango
+orange
+EOF
+
+
+----
+
+"tee" command in Linux OS
+The `echo` command has a limitation. Regular redirection with `echo` will fail whenever we are using `sudo` because our shell is unprivileged. We can use `tee` to overcome this issue. 
+We cannot send the output to multiple files with the `echo` command. 
+
+echo "hello" | sudo tee /etc/test.conf
+
+ls -l | tee test.txt		--> shows output in terminal and saves the output to the file
+ls -l | tee -a test.txt		--> shows output in terminal and appends the new info into the file.
+
+ls -l | tee file1.txt file2.txt		--> sends the output to multiple files
+
+================================
+
+D: 26/08/2026
+
+zip <zip.name> <file1.txt> <file2.txt>			--> Zip only selected 2 files
+zip <zip.name> *								--> Zip all files from current location
+zip <zip.name> f*								--> Zip all files from current location name starsts with f
+zip songs.zip songs/							--> Zip all files from songs dir
+zip -e <pwd.zip> <file1.txt> <file2.txt>		--> Zip only selected 2 files with password protection
+zip -r <zipname.zip> /directory-path			--> zip folders recursively
+
+unzip -l alldata.zip							--> Shows the files without unzip
+unzip alldata.zip -d /tmp/						--> unzip to a specific directory
+unzip <zipfolder.zip>
+
+----
+
+tar (tape Archieve)
+
+c - create
+x - unzip
+v - verbose
+z - compress
+f - filename
+
+tar -cvzf mybackup.tar.gz <file1.txt> <file2.txt>		--> zip multiple files
+
+tar -xvzf mybackup.tar.gz 								--> unzip tar file
+tar -xvzf mybackup.tar.gz -C /tmp						--> unzip tar file
+tar -tvzf mybackup.tar.gz 								--> view files from tar file without untar
+
+--------------
+
+find : this `find` command helps us to search the files or directories based on multiple search criteria like name, date created, type, and size of the file. 
+
+sudo find / -name file1.txt			--> Search the entire operating system from / for file1.txt. 
+sudo find / -iname file1.txt		--> Search from / for file1.txt - case insensitive
+sudo find . -name file1.txt			--> Search current location for file1.txt. 
+
+sudo find / -name "*.log"			
+sudo find / -name "error*"			
+
+sudo find /home -type f -name "*.txt"
+sudo find / -type d -name "tmp"
+sudo find / -type d -name "logs"
+
+sudo find /home -type f -empty			--> list empty file
+sudo find /home -type d -empty			--> list empty directories
+
+sudo find / -type f -size +250M			--> identify the files size more than 250 mb
+
+find /path/to/directory -type f -mtime +7 -delete		--> Dont try this
+
+---------------
+
+Copy files from your local laptop to Ec2 instances.
+
+Windows laptop --> Windows Instance ==> Copy & Paste (or) Map local disk
+Windows laptop --> Linux Instance	==> Install WinSCP/Mobaxterm and connect, then copy
+mac OS			-> Windows Instance ==> Copy & Paste (or) Map local disk
+mac OS			-> Linux Instance 	==> use SCP for data transfer
+EC2 Linux		-> EC2 Linux		==> use SCP (Keypair / Password)
+
+
+
+SCP : Secure Copy : SFTP command designed for transferring files between two Linux machines. It uses the SSH protocol. 
+
+
+copy files from local laptop / linux ec2 wit Keypair
+scp -i awar11-na.pem fruits.txt ec2-user@13.203.227.114:/home/ec2-user
+
+
+Copy a entire folder to ec2 instance using password auth
+scp -r ./new/ ec2-user@13.203.227.114:/home/ec2-user
+
+From ec2 instance to local machiene
+scp ec2-user@13.203.227.114:/home/ec2-user/new/server.txt ./
+
+--------------
+
+from local to instance using rsync command - Password:
+rsync -avz ec2.txt ec2-user@13.203.227.114:/home/ec2-user/
+
+from local to instance using rsync command - Keypair:
+rsync -avzP -e "ssh -i awar11-na.pem" ec2.txt ec2-user@13.203.227.114:/home/ec2-user/
+
+--------------
+
+sed : stream editor : stream editor helps us to find and replace the text from a file or find and delete the text "without opening the file". 
+
+
+cat <<EOF > fruits.txt
+apple
+banana
+mango
+orange
+apple juice apple slices
+EOF
+
+
+sed 's/apple/pineapple/' fruits.txt		--> view - Replaces the first occurance apple with pineapple
+sed 's/apple/pineapple/g' fruits.txt	--> view - Replaces the all occurance apple with pineapple
+
+sed -i 's/apple/pineapple/g' fruits.txt		--> Write the changes, replaces apple with pineapple in all occurances
+
+
+sed '/mango/a kiwi' fruits.txt
+
+
+=============================
+
+D: 27/08/2026
+
+
+sudo dnf install cronie -y
+sudo systemctl status crond
+sudo systemctl enable crond
+
+crontab -l						: List current users cronjobs
+crontab -e						: Add a cron job for current user
+crontab -r						: Remove the cron job
+
+* * * * * date >> /tmp/user-cron.txt
+
+#! : shebang : OS looks at the 2 bytes for kernel to run script
+/bin/bash : Bash Interpreter binary
+
+#!/bin/bash
+echo "cronjob ran at $(date)" >> /tmp/script-op.txt
+
+chmod +x /home/ec2-user/date.sh
+
+--
+
+Cron for all users :
+
+location: /etc/crontab
+
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name  command to be executed
+
+
+* * * * * ec2-user /home/ec2-user/date.sh
+
+@reboot 
+@daily
+
+to get cron job logs: 
+1. sudo dnf install rsyslog -y && sudo systemctl start rsyslog && sudo systemctl enable rsyslog
+2. cron logs stores in : /var/log/cron
+
+
+-----------
+
+In Instance 1 : generate a ssh key
+
+ssh-keygen -t ed25519
+
+grab the public key and copy to instance-2 authorized_keys file in .ssh/authorized_keys
+
+===============
+
+
+HDD : hard Disk Drive : Machanical Drive : uses a spinnind mangenic platters. pointer read and write data.
+
+SSD : Solid State Drive : Flash Drive : Data stores in micro chips like USB.
+* Better performance, less noise
+
+IOPS : input and output Operations per Second
+
+HDD : 75 - 500 IOPS
+SSD : 50k - 10L IOPS
+
+Throughput : Data Transfer rate : Mb/s gb/ps..
+
+Throughput = (IOPS x Data Block Size - KB) / 1024
+
+
+lsblk -o NAME,PHY-SEC
+cat /sys/block/nvme0n1/queue/physical_block_size
+
+
+======================
+
+D: 28/08/2026
+
+
+SSD 	: gp2, gp3, io1, io2
+HDD 	: sc1, st1
+Magnetic: Standard
+
+root volume : a root volume is nothing but a volume that contains the operating system. 
+Addl volume : apart from root all other volumes are considered additional volumes. We can use this to store the data. 
+
+root volume : gp2, gp3, io1, io2, standard..
+Addl volume : gp2, gp3, io1, io2, standard, sc1, st1
+
+==========
+
+gp2 and gp3 : general purpose SSD : we use these general-purpose volumes for common workloads. 
+
+gp2 : Min 1 Gb, Max 16 TB.. 1 gb volume gives us 3 IOPS (1:3 ratio), with min of 100 IOPS.. - 16k IOPS
+gp3 : Min 1 Gb, Max 64 TB.. Min 3000 IOPS and Max 80,000 IOPS - We have option to adjust IOPS based on our workload requirements, IOPS cost us.. 
+
+--------
+
+io1 and io2 : Provisioned IOPS : if our workload requires a specific IOPS count, then we can go with the provisioned IOPS option. It costs a bit more compared to all other models but it is the one that gives the best performance among all. 
+
+io1 : min 4 Gb, Max 16 TB.. 1 gb gives 50 IOPS by default
+io2 : Min 4 gb, max 64 TB.. Min 100 IOPS, Max 200000 IOPS
+
+-------
+
+HDD : sc1, st1 : These are HDD volumes, lower performance compared to SSD, but very cheap.. 
+
+st1 / Throughput optimsied HDD : suitable for bigdata, datawarehousing and log processing kind of workload..
+sc1 / cold hdd : same use case as st1, but lower cost with lower performance.. 
+
+Min: 125 GB.. Max: 16 TB.. 
+
+-------
+
+Standard / magnetic : Low cost storage solution.. Min 1 GB.. Max 1 TB.. 
+
+
+=================
+
+file system : a file system is an internal blueprint that organises, stores, and retrieves our data from the volume. Below are the points that a file system performs:
+1. It brings order to the raw storage.
+2. It can track assets.
+3. It finds the free space, writes the content into the space, and maintains the index.
+Whenever we want to open any file, the file system looks at that index and it will fetch
+
+
+Windows : FAT16, FAT32, NTFS, ReFS
+Linux : ext3, ext4, xfs
+
+
+ext3 : Third Extended File system : 
+ext4 : Forth EXtended file system : 
+xfs : eXtended File System : widely used in modern machienes / CLoud.. (effortless scaling with no downtime..  reflink: helpful for cloning volumes.. Huge data handling) 
+
+lsblk
+df -Th
+file -s
+mkfs
+mkdir
+mount
+xfs_growfs
+growpart
+
+
+lsblk : the `lsblk` command is a utility command to display information about all the available storage devices. 
+
+lsblk
+lsblk -pf		: shows volumes full path and file system
+
+full path of the volume: /dev/nvme0n1
+
+df : disk free :
+
+df
+df -Th
+
+df -Th -x tmpfs
+
+
+step 1 : Create a volume in same AZ as our ec2 instance and attach the volume. 
+
+Identify the volume name: lsblk -pf
+New volume path: /dev/nvme1n1
+
+step 2 : Verify the new volume has any file system
+
+sudo file -s /dev/nvme1n1
+
+output: data		: No file system
+
+step 3 : Write a file system to the new volume
+
+sudo mkfs -t xfs /dev/nvme1n1
+
+sudo file -s /dev/nvme1n1
+lsblk -pf
+
+
+step 4 : mount the volume to directory
+
+cd /mnt/
+sudo mkdir nowvol
+
+sudo mount /dev/nvme1n1 /mnt/nowvol
+
+----
+
+step 5 : make the mount persistent, that can survive reboot / stop and start of ec2 instance..
+
+cat /etc/mtab | grep nvme1n1
+
+/dev/nvme1n1 /mnt/nowvol xfs rw,seclabel,relatime,inode64,logbufs=8,logbsize=32k,sunit=8,swidth=8,noquota 0 0
+
+write above entry into /etc/fstab file
+
+sudo vim /etc/fstab
+
+save and quit
+
+mount -a
+mount -all
+
+----
+
+To increase existing volume size
+1. We first have to increase the volume size in the AWS console.
+2. We need to perform operations at the OS level.
+
+sudo xfs_growfs -d /mnt/nowvol
+
+-----
+
+To increase the root volume size:
+1. We first have to increase the volume size in the AWS console.
+2. Root volume mounted to a partition so we need to use the `growpart` command.
+
+sudo growpart /dev/nvme0n1 1
+
+We need to reboot instance.. 
+
+----
+
+If you use aws volume copy feature, if you attach volume to same instance, We get same UUID as existing volume. THis need to be regenerated.
+
+--> If we are attaching to another instance, we dont see this issue. 
+
+sudo xfs_admin -U generate /dev/nvme2n1
+
+sudo mount /dev/nvme2n1 /mnt/volclone
+
+
+---
+
+1. Safely remove entry from /etc/fstab file
+
+2. unmount
+sudo umount /mnt/nowvol
+sudo umount /dev/nvme1n1
+
+---
+
+
+
+
+
+
+
+
+
+
+
+

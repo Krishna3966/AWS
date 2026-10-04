@@ -1,0 +1,268 @@
+
+
+Vertical scaling : 
+-----------------
+
+Upgrading resources on a single server. Whenever the currently configured configuration is not able to handle the load, we can add more resources or we can remove resources. 
+--> Simplicity: There is no need to change our application code, centralised storage, or managing multiple clusters. You simply change the instance type to better or higher-configuration hardware. 
+--> The hardware ceiling : At the end of the day we will hit the maximum possible configuration offered by the service provider. 
+--> If our workload is running only in one availability zone, if something happened to that particular availability zone, our application is going to be down. 
+
+** AWS : we cannot perform vertical scaling without stopping our EC2 instance. 
+
+
+--> Metrics, Logs, Alarms
+--> Internally discuss with team and feedback
+--> CRQ (Change Request)
+--> CAB (Change Advisory Board) - NonProd-2 Times a week.. 
+--> NON-Prod CRQ CAB Meeting : Budget..?  DOWNTIME REQUEST.? Client Facing..? Client Communicated.? Rollbackplan.?
+Implementation steps.? (Pre-Implementation and Post Implementation).. Teams involved.? Task creted for involved team.? Validation.? Windows.?? 
+--> NonProd-CRQ will be approved
+
+2 WEEKS OBSERVATION
+
+--> CAB (Change Advisory Board) - Prod - 1 time.. 
+--> PROD CRQ CAB Meeting : IS NON-PROD IMPLEMENTED.?? CRQ ID..?? Budget..?  Downtime.? Client Facing..? CLient Communicated.? Rollbackplan.?
+Implementation steps.? (Pre-Implementation and Post Implementation).. Teams involved.? Task creted for involved team.? Validation.? Windows.??
+--> PROD-CRQ will be approved
+
+
+SDLC : Dev --> QA --> SIT --> UAT --> PRD
+
+
+
+
+Horizontal scaling :
+--------------------
+Adding more individual servers has the flexibility that we can add an infinite number of servers to deliver the same kind of workload and we will get very high fault tolerance. 
+
+--> High Availability : we can distribute our application across multiple servers. This means our system remains resilient during a single hardware failure or multiple hardware failures, or during traffic spikes. 
+--> We must create a load balancer to route the traffic across multiple servers. As multiple servers are delivering the same kind of application, it needs a single point of contact. 
+
+ELB : Elastic Load Balancer
+
+--> CLB : Classic Load Balancer : Outdated, AWS Stopped supporting
+--> ALB : Application LB :  Layer 7 LB : 
+--> NLB : Network LB : Layer 4 LB : 
+
+
+TCP/IP Layers:  7 layers
+
+Application : Http, https.. This is a place where our actual application lives. (L7)
+
+Presentation : TLS/SSL, ASCII, Data Encryption.. 
+
+Session Layers : Opens and manages the connections
+
+Transport layers (L4) : TCP, UDP, TLS..  it moves the data between applications using port numbers and IP addresses. TCP guarantees the order and delivery so network load balancer routing happens at this layer. 
+
+Network Layers : IP/ICMP : Finds the path from one network to another using IP Address. 
+
+Data Link : MAC/Switches/Routers: node to node routing across the network by using MAC ID 
+
+Physical Layer : cable/fibre: ones and zeros are electrical, light, or radio signals. It will use cables, fibres, Wi-Fi, and radio signals, hubs, and it will prepare and take the raw bit signal and convert it to the signals.  
+
+====================
+
+--> ALB : Application LB :  Layer 7 LB :  http, https : Path, Host Based routing, httpd headers.. latency compared to NLB.. No static IP..
+
+--> NLB : Network LB : Layer 4 LB : TCP, UDP : Capable of handling millions of req per second with ultra low latency.. less latency compared to ALB..
+
+===================
+
+D: 09/09/2026
+
+LoadBalancer designed to deliver the output to the entire world. 
+
+Question: Should my EC2 instance also deliver web content to everyone with Direct Instance IP? 
+
+Adjust your EC2 instance's security group:  Open ports 80 and 8080 to the load balancer's security group so only the load balancer can access the web content from the EC2 instance. 
+
+If anyone directly tries to access the EC2 instance, it won't deliver the web content. 
+
+----
+
+WebServer-SG
+
+http: 80 : ELB-SG
+https: 443  : ELB-SG
+c http: 8080 : ELB-SG
+
+ELB_SG:
+
+http: 80 : 0.0.0.0/0
+https: 443  : 0.0.0.0/0
+c http: 8080 : 0.0.0.0/0
+
+=======================
+
+Target Group: Combination/Group of multiple EC2 instances that are running on the same port and delivering the same application.
+
+Target registration:
+1. Instance: EC2 instances will register with the target group by using instance ID.
+2. IP address: Instances register with the target group by using private IP address. We have an advantage whenever we are using IP address. If our architecture is hybrid we can add on-premises servers also using IP.
+
+
+Interviewer: In the target group your EC2 instance is showing its status as unhealthy. How will you troubleshoot? 
+1. Verify whether the instance is in a running state or not.
+2. Verify whether the instance's security group requires the port to be open or not.
+3. Verify the health check path we configured at the target group level.
+4. Whether the application is really running inside the EC2 instance and configured on the same port.
+5. Verify the load balancer's subnet status and whether your EC2 instance is running.
+
+** There is no need to have the same port at the target group and listener levels. Your application can be on port number 80 and you can configure the listener on 88 at the load balancer level and redirect the traffic. 
+
+** One instance can be a member of multiple target groups. 
+
+
+Application LB : 
+nslookup myapp-alb-462562902.ap-south-1.elb.amazonaws.com
+13.203.175.107
+3.111.108.126
+
+** These IP addresses are not static or fixed. They may change. 
+
+---
+
+Network LoadBalancer has an advantage to have a static IP. We can generate elastic IP addresses we can associate with the network load balancer. 
+
+nslookup myapp-nlb-1aeb56837c7871f8.elb.ap-south-1.amazonaws.com
+43.204.65.36
+13.235.203.177
+
+----
+
+ALB Supported Algorithms: 
+
+round-robin algorithm : appication load balancer defaults to the nested round-robin algorithm. This is the default algorithm and traffic is routed in a cycle across all the instances. 
+
+least outstanding request : a load balancer evaluates the existing instances and existing requests and when a new request comes, it will decide where it has to go based on the load. 
+
+Weighted Random : this algorithm uses anomaly mitigation to identify HTTP status codes and connection errors. Based on those errors it will route the traffic intelligently. 
+
+----
+
+NLB Supported Algorithms: a network load balancer works with the flow hash algorithm. It will use the following as ingredients:
+- source IP (who sends it)
+- source port
+- destination IP address (the network load balancer's public IP address)
+- destination port (80 or 443)
+- protocol (TCP or UDP)
+It will read the above information, then it will prepare a hashing, then it will send the request to the target. 
+
+----
+
+We can enable stickiness on the application load balancer so it will stick the session to that particular instance or web server till the sticky session validity completes. 
+
+---
+
+We need to have a fixed IP address for our application load balancer delivering an application which is running on an HTTP port. 
+
+1. Reconfigure your entire application to support the TCP protocol and configure a network load balancer. Attach a static IP to your client. 
+
+2. Take the entire "application load balancer" and attach it to a "network load balancer" as a "target". Make sure the network load balancer has a static IP.
+
+
+---
+
+An application load balancer works better with a containerized or microservice-based workload as it supports host-based, path-based routing. 
+
+A network load balancer works for large-scale request handling. It can support millions of requests per second while maintaining ultra-low latency. 
+
+---
+
+D: 10/09/2026
+
+
+Prerequisites:
+
+1. Create an EFS and Mount it to the base instance.
+2. Launch an ec2 instance and perform the required changes including thr EFS mount (Step 1 EFS).
+3. Create a GoldenAMI from the instance we prepared in Step-2.
+4. Create a Launch template (AMI - step3, Keypair, Instance Type, SG, Volume) and define the settings you need for the instances running with ASG. (DONT INCLUDE SUBNETS)
+5. Create Target group (Dont add any instances)
+6. Crete a Load Balancer
+7. Create an ASG
+
+
+Business 2 Business : we can easily predict the load so that we can configure our application to run with a specific desired count. 
+
+
+Cloudwatch Alarm : 
+
+Simple Scaling Policy:
+ASG Instances CPU Usage >=80 --> Desired Count to 10
+ASG Instances CPU Usage <=20 --> Desired Count to 1
+
+Step Scaling: 
+ASG Instances CPU Usage below 10% --> Desired Count to 1
+ASG Instances CPU Usage between 10 to 20% --> Desired Count to 2
+ASG Instances CPU Usage between 20 to 60% --> Desired Count to 3
+ASG Instances CPU Usage between 60 to 80% --> Desired Count to 6
+ASG Instances CPU Usage 80% above --> Desired Count to 10
+
+Target Scaling Policy: **
+We can define the average CPU utilisation required for our EC2 instances.  Avg 70%.. 
+
+Scheduled Scaling Policy: 
+Scaling activity happened during the only defined window. We can configure with cron format as well. 
+
+----
+
+1. SG Configuration;
+
+ELB-SG - http, https - 0.0.0.0/0
+WebServer-SG - http, https - ELB-SG
+EFS-SG - NFS - 2049 - WebServer-SG
+
+
+2. Create EFS
+
+3. launch ec2 instance and make it as webserver, mount efs and make it perm moount.. Setup user passwords and configure addl users..
+reboot and validate all the changes
+
+4. Create a GoldenAMI
+
+5. Create a launch template
+
+6. Create a TG and LoadBalancer. Dont add any ec2 instances. 
+
+7. Create ASG
+
+
+Balanced best Effort : if launching an EC2 instance fails in one availability zone, an auto-scaling group will attempt to launch in another availability zone. 
+
+Balanced Only : if launching an EC2 instance fails in one availability zone, an auto-scaling group will continue reattempting to launch instances in the same availability zone to preserve balanced distribution across AZs.
+
+--
+
+Manual Scaling : manually we can adjust the desired capacity so that the auto-scaling group will add or remove EC2 instances based on the value we define. 
+
+---
+
+Automatic Scaling : 
+
+Simple Scaling : 
+
+Step Scaling : 
+
+Target Tracking Scaling : 
+
+---
+
+Health check grace period: The time the auto-scaling group waits before checking the health of a newly launched instance. This helps us to prevent prematurely killing an instance that is still warming up or completing the boot process or boot scripts. 
+
+Cooldown period: it prevents the auto-scaling group from launching or terminating a new instance while waiting for the previous scaling activity to take effect. 
+
+
+
+
+
+
+
+
+
+
+
+
+

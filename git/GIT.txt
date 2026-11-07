@@ -1,0 +1,409 @@
+Git is a version control system. It's a tool that records snapshots of our project over time so we can review history, undo mistakes, and collaborate without overwriting each developer's work. 
+
+
+1973		- SCCM	- Source code control system 	- 1 file
+			  RCM - revision control system 		- x files, 1 Directory
+			  CVS - concurrent version system 		- x files, x dire, 1 user
+			  
+2000		- SVN - subversion						- x files, x dire, x users
+
+2005		- GIT - Global Information Tracker		- branching, cherry pick
+
+=======
+
+https://git-scm.com/install/
+
+git config --list								: Show the existing configuration. 
+git config --global user.name "avinash"
+git config --global user.email "avinash@avizacademy.com"
+git config --global core.editor "vim"
+git config --global --edit
+
+git config --global init.defaultBranch main		: Sets main as default branch
+
+
+---
+
+git init
+
+objects/		: Directory structures, compressed file content, commit histories, and tags 
+refs/			: It stores pointers to commits. 
+hooks/			: Contains customizable scripts that Git runs automatically before / after a commit / push. 
+logs/			: Keeps the history of the changes 
+info/			: Additional global files 
+
+HEAD			: Point to the current checkout branch or specific commit hash. 
+index			: The staging area where Git prepares the content for our next commit 
+
+
+=============================
+
+D: 15/10/2026
+
+
+git init
+
+git config --global init.defaultBranch main		: Sets main as default branch
+
+git add 							: Moves the file to staging/index area. 
+
+git add .
+git add <file-name>
+
+git rm --cached mycode.txt			: Remove the file from staging
+
+git commit -m "id - Added first file"
+
+git branch -M main					: To rename the default branch to "main"
+
+
+Traditional Git creates a branch with the name `master` but all the latest Git providers like GitHub, GitLab, and Bitbucket use the default branch name `main`. It is recommended to use `main` as a branch name over `master`. 
+
+---
+
+git log
+git log --oneline
+
+79b543b (HEAD -> main) added file2
+85ebb16 added space for testing
+b4e7e02 id - Added first file
+
+
+1. You haven't pushed your code yet... All are local commits
+
+Option A : Undo the commit, but KEEP your code changes	
+git reset HEAD~1
+
+Option B : Undo the commit and DESTROY all changes.
+git reset --hard HEAD~1
+
+----
+
+git diff b4e7e02..85ebb16			: TO compare changes happened between 2 commits
+
+====================
+
+git remote add origin https://github.com/avizway1/awar11-gitdemo.git			: Adding remote repo
+
+git push -u origin main															: push local changes		
+
+git push --set-upstream origin main	
+
+git push
+
+======================
+
+
+SSH-Authentication method:
+
+ssh-keygen -t ed25519 -C "avinash@avinash.com"
+
+/home/ec2-user/.ssh/id_ed25519
+
+eval "$(ssh-agent -s)"
+
+ssh-add ~/.ssh/id_ed25519
+
+Copy the public key content and store it in the GitHub account under GitHub Settings > SSH and GPG keys.
+
+ssh -T git@github.com
+
+===================
+
+git fetch
+git pull
+
+Generally the best method developers follow : 
+- They always fetch and pull, first before they start their day 
+- Before they are pushing their code to the remote repo. 
+
+
+===================
+
+clone : we can get a copy of our entire codebase to our local machine. 
+- Whenever you get a new laptop you need to get the entire codebase to your new laptop. 
+- Whenever any new team member joins, he needs to start work. 
+- If it is a public repository you use the "HTTPS" method to clone. 
+
+pull : when multiple team members are working on the same repository, if you want to get their changes to your local laptop, then you can run the `pull` command. 
+- Before they start their day 
+- Before they are pushing their code to the remote repo. 
+
+===================
+
+.gitignore	: A git ignore file helps to not commit unwanted files or sensitive files to the remote repository from the local repository. 
+
+node_modules
+.DS_Store
+Thumbs.db
+.git/*
+a*
+.env
+
+===================
+
+git init
+git status
+git add .
+git commit -m "msg"
+git remote add origin <url>
+git push
+
+git clone
+git fetch
+git pull
+
+git diff
+
+
+=========================================================
+
+D: 16/10/2026
+
+Create a repository with the same name as your GitHub username. Automatically it will treat it as a special repository. 
+- When you create a README.md file inside that special repository, it will appear on our GitHub home screen. 
+- Provide all your professional info and ask GPT to prepare a .MD file.
+
+==============
+
+Branching : branching helps us to create a separate line of development to work on new features and bug fixes without touching our main codebase. 
+
+
+TBD : trunk-based development : it's GitHub's one of the development strategies:
+- We generally don't work on the main branch directly.
+- We create a branch and do all the work, like feature implementation and bug fixes.
+- Once the feature development is completed we merge the code into the main branch.
+
+
+git branch		: Shows which branch we are currently working on. 
+
+- Git branch created when we perform our first commit.
+
+git branch feature-x
+
+git checkout feature-x					: Switch to feature-x branch (Traditional)
+git switch feature-x					: Switch to feature-x branch (Modern)
+
+git switch -c feature-x					: Create a branch and switch to that branch automatically
+git checkout -b feature-x				: Create a branch and switch to that branch automatically
+
+git merge								: `git merge` brings all changes together. 
+
+- switch to main branch
+- git merge <feature-x>
+
+============================
+
+In the organisation we simply don't merge our code into the main branch. All the developers create a PR (pull request). 
+- That PR should be reviewed or evaluated and approved. 
+
+git checkout -b feature-y
+
+created 2 files
+
+git add . && git commit -m "added feature-y files"
+
+git push -u origin feature-y
+
+--> Compare and create a pull request so the reviewer will review the code changes and then it merges to the main branch.
+
+
+============================
+
+Task : Create a file with your name in my repo. You need to create a PR.
+
+https://github.com/avizway1/awar11-gitdemo
+
+============================
+
+step 1 : create a file in our central repository. (info.txt)
+
+step 2 : clone/pull it to an EC2 instance. 
+
+git clone
+cd repo
+git checkout -b infofix
+
+vim info.txt
+
+git add . && git commit -m "Added valid info"
+
+** NOT PUSHED TO MAIN / CENTRAL REPO YET
+
+
+step 3 : ON YOUR LAPTOP, clone the repo
+
+edit the file
+
+git add . && git commit -m "Added valid info" && git push origin main
+
+---
+
+step 4 : switch back to ec2 instance
+
+git switch main
+
+git pull origin main
+
+git merge infofix
+
+we get conflict..
+
+=======================
+
+
+Hi, Good Morning..!!!
+<<<<<<< HEAD
+My Name is Anudeep
+Am working as Marketing Manager
+=======
+My Name is Avinash
+Am working as Cloud & DevOps Engineer
+>>>>>>> infofix
+have a nice day.!!!
+
+
+=======================
+=======================
+
+
+git merge : `git merge` brings all changes together. This is a very simple and safe approach for repositories where multiple developers are working (shared repositories). 
+
+
+Assume you and your frined writing a book and it has 6 chapters.. YOU: 3 chapters.. YOUR FRIEND: 3 chapters..
+
+MERGE: 
+- You wrote three chapters. 
+- Your friend wrote three chapters at the same time.
+You both decided to combine. 
+--> If you merge, It shows as you wrote 3 chapters and your friend wrote 3 chapters.
+--> Merge keeps all original commit hashes.
+
+REBASE: `git rebase` rewrites all the changes. It is not a recommended approach for shared repositories. 
+- Whenever you are working primarily in your local repositories, you can use this to reduce the commit count. 
+
+- You wrote three chapters. 
+- Your friend wrote three chapters at the same time.
+You both decided to combine. 
+--> It shows your three chapters first, then your friend's three chapters, for a clean and linear history. 
+
+
+THUMB RULE : Never rebase shared or public repositories. It may override others' work. 
+- It changes commit hashes.
+- It destroys teammates' base history.
+- It multiplies duplicate commits.
+- It requires dangerous force pushing. 
+
+=========================
+
+mkdir rebase-lab && cd rebase-lab
+
+git init
+
+echo "C1" > main.txt && git add . && git commit -m "C1"
+echo "C2" >> main.txt && git add . && git commit -m "C2"
+echo "C3" >> main.txt && git add . && git commit -m "C3"
+
+git checkout -b feature HEAD~1
+
+
+echo "D" >> feature.txt && git add . && git commit -m "D - feature work"
+echo "E" >> feature.txt && git add . && git commit -m "E - feature work"
+
+
+git log --oneline --graph --all
+
+
+* 9d1c6a6 (HEAD -> feature) E - feature work
+* 7b5f3c1 D - feature work
+| * a1cf52b (main) C3
+|/  
+* 7b47029 C2
+* 4da0eed C1
+
+REBASE:
+
+* a22d200 (HEAD -> feature) E - feature work
+* f1b7ce1 D - feature work
+* a1cf52b (main) C3
+* 7b47029 C2
+* 4da0eed C1
+
+======================================================================
+
+D: 17/10/2026
+
+git stash : 
+
+Imagine you are working on some changes and suddenly your team member asks you to switch to another branch to fix a very important or critical bug. 
+
+- If your changes areunfinished changes, you can't commit them but you don't want to lose them. 
+
+--> We can stash them, we can switch to other branch, once the work completed, We can switch back to our branch, Then we can unstash it.
+
+
+git stash					- stash the changes
+git stash apply				- apply the stashed changes
+git stash list				- list the stashes
+git stash show -p			- show stash content
+git stash pop				- apply and remove the stash
+git stash push -m "msg"		- create a stash with custom msg
+
+
+echo "STASH-Test" > main.txt && git add . && git commit -m "stash test"
+
+
+echo "STASH" >> main.txt && git add . && git commit -m "C2"
+
+Please commit your changes or stash them before you switch branches.
+
+=============
+
+cherry-pick : `git cherry-pick` is a command we can use to copy a specific commit from one branch and apply it in another branch. 
+
+
+
+main branch commits:
+a1cf52b (HEAD -> main) C3
+7b47029 C2
+4da0eed C1
+
+feature branch commits: 
+
+49a19b1 (HEAD -> feature) tested stashing
+a9de00f stash test
+a22d200 E - feature work
+f1b7ce1 D - feature work
+
+
+echo "cherry pick 1" >> cheery-test.txt && git add . && git commit -m "cherry test 1"
+echo "cherry pick 2" >> cheery-test.txt && git add . && git commit -m "cherry test 2"
+echo "cherry pick 3" >> cheery-test.txt && git add . && git commit -m "cherry test 3"
+
+git cherry-pick 4358d24
+
+====================
+
+We have multiple options to host git application (code is in git)..
+
+- netligy
+- vercel
+- aws amplify
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

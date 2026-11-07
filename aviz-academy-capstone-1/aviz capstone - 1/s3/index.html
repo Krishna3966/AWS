@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aviz Academy — Secure Photo Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-0: #0b1020;
+            --bg-1: #111935;
+            --surface: rgba(255, 255, 255, 0.06);
+            --surface-strong: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #eef1f8;
+            --text-dim: #9aa3bd;
+            --brand: #6c8cff;
+            --brand-2: #a06bff;
+            --success: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --info: #38bdf8;
+            --radius: 16px;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 16px;
+            background:
+                radial-gradient(1200px 600px at 12% -10%, rgba(108, 140, 255, 0.25), transparent 60%),
+                radial-gradient(1000px 700px at 110% 10%, rgba(160, 107, 255, 0.22), transparent 55%),
+                linear-gradient(160deg, var(--bg-0), var(--bg-1));
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            background: var(--surface);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        /* ---------- Header ---------- */
+        .header {
+            position: relative;
+            padding: 36px 36px 30px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(108, 140, 255, 0.18), rgba(160, 107, 255, 0.12));
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+        .logo img { width: 38px; height: 38px; border-radius: 10px; }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .private-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-chip {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            padding: 6px 12px 6px 6px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            color: var(--text);
+            max-width: 240px;
+        }
+        .user-chip .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .user-chip span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .auth-btn {
+            padding: 9px 16px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .auth-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+
+        .content { padding: 32px 36px 40px; }
+
+        /* ---------- Upload ---------- */
+        .upload-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            margin-bottom: 34px;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-area {
+            border: 1.5px dashed var(--border);
+            border-radius: 14px;
+            padding: 34px 20px;
+            text-align: center;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--brand);
+            background: rgba(108, 140, 255, 0.08);
+            transform: translateY(-1px);
+        }
+        .upload-icon { font-size: 2rem; opacity: 0.9; }
+        .upload-area p { color: var(--text); margin-top: 10px; font-weight: 500; }
+        .upload-area .hint { color: var(--text-dim); font-size: 0.82rem; font-weight: 400; margin-top: 6px; }
+
+        .preview-wrap {
+            display: none;
+            align-items: center;
+            gap: 16px;
+            margin-top: 18px;
+            padding: 14px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .preview-wrap img {
+            width: 64px; height: 64px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .preview-meta { flex: 1; min-width: 0; }
+        .preview-meta .name { font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .preview-meta .size { color: var(--text-dim); font-size: 0.8rem; margin-top: 2px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: white;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 11px;
+            cursor: pointer;
+            font-size: 0.92rem;
+            font-weight: 600;
+            font-family: inherit;
+            margin-top: 18px;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 20px rgba(108, 140, 255, 0.3);
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(108, 140, 255, 0.4); }
+        .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+        /* ---------- Gallery ---------- */
+        .gallery-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .count-badge {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 4px 11px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .url-expiry {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 9px 13px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin: 14px 0;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .photo-card {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .photo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+            border-color: rgba(108, 140, 255, 0.5);
+        }
+        .photo-card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+
+        .photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(7, 11, 24, 0.92) 0%, rgba(7, 11, 24, 0) 55%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 14px;
+        }
+        .photo-card:hover .photo-overlay { opacity: 1; }
+        .photo-overlay .fname { font-weight: 600; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .photo-overlay .fmeta { color: var(--text-dim); font-size: 0.76rem; margin-top: 3px; }
+        .zoom-hint {
+            position: absolute;
+            top: 10px; right: 10px;
+            width: 30px; height: 30px;
+            border-radius: 9px;
+            background: rgba(7, 11, 24, 0.6);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .photo-card:hover .zoom-hint { opacity: 1; }
+
+        /* ---------- Empty / skeleton ---------- */
+        .empty-state, .loading-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-dim);
+        }
+        .empty-state .emoji { font-size: 2.4rem; display: block; margin-bottom: 12px; }
+        .skeleton {
+            grid-column: span 1;
+            height: 180px;
+            border-radius: 14px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 37%, rgba(255,255,255,0.04) 63%);
+            background-size: 400% 100%;
+            animation: shimmer 1.4s ease infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+        /* ---------- Login overlay ---------- */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 9, 20, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 44px 38px;
+            border-radius: 22px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: var(--shadow);
+        }
+        .login-card .logo { margin: 0 auto 22px; width: 64px; height: 64px; }
+        .login-card .logo img { width: 46px; height: 46px; }
+        .login-card h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+        .login-card p { color: var(--text-dim); margin: 12px 0 26px; font-size: 0.92rem; }
+
+        /* ---------- Toast ---------- */
+        #status {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 1100;
+            max-width: 360px;
+            padding: 14px 18px;
+            border-radius: 13px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            display: none;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            animation: toastIn 0.3s ease;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        #status.success { background: rgba(52, 211, 153, 0.16); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.4); }
+        #status.error   { background: rgba(248, 113, 113, 0.16); color: #fca5a5; border-color: rgba(248, 113, 113, 0.4); }
+        #status.info    { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.4); }
+        #status.warning { background: rgba(251, 191, 36, 0.16); color: #fcd34d; border-color: rgba(251, 191, 36, 0.4); }
+        .error-details { margin-top: 8px; font-family: ui-monospace, monospace; font-size: 0.78rem; opacity: 0.85; }
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.16);
+            color: inherit;
+            border: 1px solid currentColor;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        /* ---------- Lightbox ---------- */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 6, 14, 0.92);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 30px;
+            animation: toastIn 0.2s ease;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img {
+            max-width: 92vw;
+            max-height: 82vh;
+            border-radius: 14px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+        }
+        .lightbox-caption {
+            position: absolute;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text);
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 999px;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 22px;
+            right: 26px;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+        .lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
+
+        .loading {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: -2px;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 600px) {
+            .header { padding: 24px 20px; }
+            .content { padding: 22px 20px 30px; }
+            .header-top { flex-direction: column; align-items: flex-start; }
+            h1 { font-size: 1.35rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="logo">
+                <img src="logo.png" alt="Aviz Academy" />
+            </div>
+            <h2>Welcome back</h2>
+            <p>Sign in to access your private, secure photo gallery.</p>
+            <button onclick="signIn()" class="btn-primary" style="margin-top:0; width:100%;">
+                Sign In with Cognito
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appContent" class="container hidden">
+        <div class="header">
+            <div class="header-top">
+                <div class="brand">
+                    <div class="logo"><img src="logo.png" alt="Aviz Academy" /></div>
+                    <div>
+                        <h1>Secure Photo Gallery</h1>
+                        <div class="subtitle">
+                            Your private photos, powered by AWS
+                            <span class="private-badge">🔒 Private Storage</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div id="userChip" class="user-chip">
+                        <div class="avatar" id="userAvatar">U</div>
+                        <span id="userEmail">user</span>
+                    </div>
+                    <button id="authBtn" onclick="toggleAuth()" class="auth-btn">Sign Out</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="section-title">📤 Upload New Photo</div>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📸</div>
+                    <p>Click to browse or drag &amp; drop</p>
+                    <p class="hint">JPG, PNG, GIF, WebP · up to 10MB</p>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event)" />
+
+                <div id="previewWrap" class="preview-wrap">
+                    <img id="previewImg" alt="preview" />
+                    <div class="preview-meta">
+                        <div class="name" id="previewName"></div>
+                        <div class="size" id="previewSize"></div>
+                    </div>
+                </div>
+
+                <button id="uploadBtn" onclick="uploadPhoto()" class="btn-primary" disabled>
+                    Upload Photo
+                </button>
+            </div>
+
+            <!-- Gallery -->
+            <div>
+                <div class="gallery-head">
+                    <div class="section-title" style="margin-bottom:0;">🖼️ Your Photos</div>
+                    <span id="countBadge" class="count-badge" style="display:none;">0 photos</span>
+                </div>
+                <div id="urlExpiry" class="url-expiry">
+                    ⏱️ Images load via secure, time-limited URLs that expire in 15 minutes.
+                </div>
+                <div id="photosGrid" class="photos-grid">
+                    <div class="loading-state">Loading…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="status"></div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <img id="lightboxImg" src="" alt="" />
+        <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+
+    <script>
+        // ===== Configuration (unchanged) =====
+        const COGNITO_CONFIG = {
+            domain: 'aviz11.auth.ap-south-1.amazoncognito.com',
+            clientId: '296rju4sed5j7b6gck78vfv24o',
+            // Derived at runtime from the page URL. When served via CloudFront this becomes
+            // https://<dist-id>.cloudfront.net/ — that exact value must be registered in the
+            // Cognito app client's Allowed callback + sign-out URLs, or login fails.
+            redirectUri: window.location.href.split('#')[0],
+            region: 'ap-south-1'
+        };
+
+        const CONFIG = {
+            API_URL: 'https://0kb2j856s3.execute-api.ap-south-1.amazonaws.com/prod',
+            S3_BUCKET_NAME: 'aviz-serverless-cap11-data-storage',
+            AWS_REGION: 'ap-south-1',
+            S3_REGION: 'ap-south-1'
+        };
+
+        // ===== Globals =====
+        let idToken = null;
+        let selectedFile = null;
+        let currentEmail = null;
+        const photosGrid = document.getElementById('photosGrid');
+        const status = document.getElementById('status');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const urlExpiry = document.getElementById('urlExpiry');
+        const countBadge = document.getElementById('countBadge');
+
+        /* ===== Toast / status ===== */
+        function showStatus(message, type = 'info', details = null, showRetry = false) {
+            status.innerHTML = `
+                <div>${message}</div>
+                ${details ? `<div class="error-details">${details}</div>` : ''}
+                ${showRetry ? '<button class="retry-btn" onclick="retryLastAction()">Retry</button>' : ''}
+            `;
+            status.className = type;
+            status.style.display = 'block';
+            if (type === 'success' || type === 'info') {
+                clearTimeout(status._t);
+                status._t = setTimeout(() => { status.style.display = 'none'; }, 4000);
+            }
+        }
+
+        function handleApiError(error, operation = 'operation') {
+            console.error(`${operation} error:`, error);
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                showStatus(`Network error during ${operation}`, 'error', 'Check your connection and try again.', true);
+            } else if (error.status === 401) {
+                showStatus('Session expired. Please sign in again.', 'warning');
+                setTimeout(() => signOut(), 2000);
+            } else if (error.status === 403) {
+                showStatus('Access denied. Check your permissions.', 'error');
+            } else if (error.status === 429) {
+                showStatus('Too many requests. Please wait and retry.', 'warning', null, true);
+            } else if (error.status >= 500) {
+                showStatus('Server error occurred', 'error', `Error ${error.status}: ${error.message || 'Internal server error'}`, true);
+            } else {
+                showStatus(`${operation} failed`, 'error', error.message || `HTTP ${error.status}`, true);
+            }
+        }
+
+        /* ===== Auth ===== */
+        function checkAuth() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('id_token=')) {
+                try {
+                    const params = new URLSearchParams(hash.substring(1));
+                    idToken = params.get('id_token');
+                    if (idToken) {
+                        const tokenParts = idToken.split('.');
+                        if (tokenParts.length !== 3) throw new Error('Invalid token format');
+                        const payload = JSON.parse(atob(tokenParts[1]));
+                        const currentTime = Math.floor(Date.now() / 1000);
+                        if (payload.exp < currentTime) throw new Error('Token expired');
+
+                        currentEmail = payload.email || 'User';
+                        showAuthenticatedState();
+                        showStatus(`Welcome back, ${currentEmail}!`, 'success');
+                        loadPhotos();
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch (error) {
+                    console.error('Token validation error:', error);
+                    showStatus('Authentication error. Please sign in again.', 'error');
+                    signOut();
+                }
+            } else {
+                showUnauthenticatedState();
+            }
+        }
+
+        function signIn() {
+            const authUrl = `https://${COGNITO_CONFIG.domain}/login?client_id=${COGNITO_CONFIG.clientId}&response_type=token&scope=email+openid&redirect_uri=${encodeURIComponent(COGNITO_CONFIG.redirectUri)}`;
+            window.location.href = authUrl;
+        }
+
+        function signOut() {
+            idToken = null;
+            const logoutUrl = `https://${COGNITO_CONFIG.domain}/logout?client_id=${COGNITO_CONFIG.clientId}&logout_uri=${encodeURIComponent(COGNITO_CONFIG.redirectUri)}`;
+            window.location.href = logoutUrl;
+        }
+
+        function toggleAuth() { idToken ? signOut() : signIn(); }
+
+        function showAuthenticatedState() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('appContent').classList.remove('hidden');
+            document.getElementById('authBtn').textContent = 'Sign Out';
+            if (currentEmail) {
+                const chip = document.getElementById('userChip');
+                document.getElementById('userEmail').textContent = currentEmail;
+                document.getElementById('userAvatar').textContent = currentEmail.charAt(0).toUpperCase();
+                chip.style.display = 'flex';
+            }
+        }
+
+        function showUnauthenticatedState() {
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('appContent').classList.add('hidden');
+            document.getElementById('authBtn').textContent = 'Sign In';
+        }
+
+        /* ===== File select + preview ===== */
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const validation = validateFile(file);
+            if (!validation.valid) {
+                showStatus('File validation failed', 'error', validation.error);
+                return;
+            }
+
+            selectedFile = file;
+            uploadBtn.disabled = false;
+
+            // Thumbnail preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('previewName').textContent = file.name;
+                document.getElementById('previewSize').textContent = formatFileSize(file.size);
+                document.getElementById('previewWrap').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function validateFile(file) {
+            const maxSize = 10 * 1024 * 1024;
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                return { valid: false, error: `File type ${file.type} not allowed. Use JPG, PNG, GIF, or WebP.` };
+            }
+            if (file.size > maxSize) {
+                return { valid: false, error: `File size ${formatFileSize(file.size)} exceeds the 10MB limit.` };
+            }
+            if (file.name.length > 255) {
+                return { valid: false, error: 'Filename too long. Use a shorter name.' };
+            }
+            return { valid: true };
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function resetUploadUI() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewWrap').style.display = 'none';
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Upload Photo';
+        }
+
+        /* ===== Upload ===== */
+        async function uploadPhoto() {
+            if (!selectedFile || !idToken) {
+                showStatus('Select a file and make sure you are signed in.', 'warning');
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading"></span> Uploading…';
+
+            try {
+                showStatus('Requesting secure upload URL…', 'info');
+                const response = await fetch(`${CONFIG.API_URL}/photos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': idToken },
+                    body: JSON.stringify({ filename: selectedFile.name, contentType: selectedFile.type })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw { status: response.status, message: errorData.error?.message || response.statusText, code: errorData.error?.code };
+                }
+
+                const data = await response.json();
+                if (!data.success || !data.uploadUrl) throw new Error(data.error?.message || 'Invalid response from server');
+
+                showStatus('Uploading to secure storage…', 'info');
+                const uploadResponse = await fetch(data.uploadUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': selectedFile.type },
+                    body: selectedFile
+                });
+
+                if (!uploadResponse.ok) throw { status: uploadResponse.status, message: `Upload failed: ${uploadResponse.statusText}` };
+
+                const name = selectedFile.name;
+                resetUploadUI();
+                showStatus(`Photo "${name}" uploaded securely!`, 'success');
+                setTimeout(() => loadPhotos(), 1000);
+
+            } catch (error) {
+                handleApiError(error, 'Upload');
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Photo';
+            }
+        }
+
+        /* ===== Gallery ===== */
+        async function loadPhotos() {
+            if (!idToken) return;
+            photosGrid.innerHTML = Array(4).fill('<div class="skeleton"></div>').join('');
+
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/photos`, { headers: { 'Authorization': idToken } });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw { status: response.status, message: errorData.error?.message || response.statusText, code: errorData.error?.code };
+                }
+
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error?.message || 'Failed to load photos');
+
+                displayPhotos(data.photos || [], data.urlExpiry);
+
+                const n = (data.photos || []).length;
+                countBadge.textContent = `${n} photo${n === 1 ? '' : 's'}`;
+                countBadge.style.display = 'inline-block';
+                urlExpiry.style.display = n > 0 ? 'flex' : 'none';
+
+            } catch (error) {
+                handleApiError(error, 'Load photos');
+                photosGrid.innerHTML = '<div class="empty-state"><span class="emoji">⚠️</span>Failed to load photos. Please try again.</div>';
+                urlExpiry.style.display = 'none';
+                countBadge.style.display = 'none';
+            }
+        }
+
+        function displayPhotos(photos, expiry) {
+            if (!photos || photos.length === 0) {
+                photosGrid.innerHTML = '<div class="empty-state"><span class="emoji">🖼️</span>No photos yet — upload your first one above!</div>';
+                return;
+            }
+
+            const fallback = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyNTNmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzc3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIHVuYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg==";
+
+            photosGrid.innerHTML = photos.map(photo => {
+                const imageUrl = photo.imageUrl;
+                const uploadDate = photo.uploadDate ? new Date(photo.uploadDate).toLocaleDateString() : 'Unknown';
+                const safeName = (photo.filename || 'photo').replace(/"/g, '&quot;');
+                return `
+                    <div class="photo-card" onclick="openLightbox('${imageUrl}', '${safeName}')">
+                        <div class="zoom-hint">🔍</div>
+                        <img src="${imageUrl}" alt="${safeName}" loading="lazy"
+                             onerror="this.src='${fallback}';">
+                        <div class="photo-overlay">
+                            <div class="fname">${safeName}</div>
+                            <div class="fmeta">${uploadDate} · ${photo.contentType || 'image'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ===== Lightbox ===== */
+        function openLightbox(url, name) {
+            document.getElementById('lightboxImg').src = url;
+            document.getElementById('lightboxCaption').textContent = name;
+            document.getElementById('lightbox').classList.add('open');
+        }
+        function closeLightbox(e) {
+            if (e && e.target.id === 'lightboxImg') return;
+            document.getElementById('lightbox').classList.remove('open');
+        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+        /* ===== Retry ===== */
+        let lastAction = null;
+        function retryLastAction() { if (lastAction) lastAction(); }
+        const originalUploadPhoto = uploadPhoto;
+        uploadPhoto = function () { lastAction = originalUploadPhoto; return originalUploadPhoto(); };
+        const originalLoadPhotos = loadPhotos;
+        loadPhotos = function () { lastAction = originalLoadPhotos; return originalLoadPhotos(); };
+
+        /* ===== Drag & drop ===== */
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                handleFileSelect({ target: { files: [files[0]] } });
+            }
+        });
+
+        /* ===== Init ===== */
+        checkAuth();
+        window.addEventListener('popstate', checkAuth);
+    </script>
+</body>
+</html>

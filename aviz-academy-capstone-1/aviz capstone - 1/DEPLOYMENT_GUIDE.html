@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Secure Photo Gallery — AWS Serverless Deployment Guide (CloudFront)</title>
+<style>
+    :root {
+        --brand: #2a5298;
+        --brand-2: #6c8cff;
+        --ink: #1f2733;
+        --ink-dim: #5b6675;
+        --line: #e3e8ef;
+        --bg: #f6f8fb;
+        --code-bg: #0f1729;
+        --code-ink: #e6edf7;
+        --ok: #1a7f4b;
+        --warn: #9a6700;
+        --danger: #b42318;
+        --ok-bg: #e7f6ee;
+        --warn-bg: #fff7e6;
+        --danger-bg: #fdecea;
+        --info-bg: #e8f0fe;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.6;
+        font-size: 15.5px;
+    }
+    .layout { display: flex; max-width: 1180px; margin: 0 auto; }
+
+    /* ----- Sidebar TOC ----- */
+    aside {
+        width: 280px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 28px 18px;
+        border-right: 1px solid var(--line);
+        background: #fff;
+    }
+    aside .brand {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: var(--brand);
+        margin-bottom: 4px;
+        letter-spacing: -0.01em;
+    }
+    aside .sub { font-size: 0.8rem; color: var(--ink-dim); margin-bottom: 20px; }
+    aside nav a {
+        display: block;
+        color: var(--ink-dim);
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 0.86rem;
+        margin: 1px 0;
+    }
+    aside nav a:hover { background: var(--info-bg); color: var(--brand); }
+    aside nav a.step { font-weight: 600; color: var(--ink); }
+    aside nav .grp { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9aa3b2; margin: 16px 10px 4px; }
+
+    /* ----- Main ----- */
+    main { flex: 1; min-width: 0; padding: 40px 48px 80px; background: #fff; }
+    header.hero {
+        background: linear-gradient(135deg, #1e3c72, #2a5298 55%, #6c8cff);
+        color: #fff;
+        margin: -40px -48px 36px;
+        padding: 46px 48px;
+    }
+    header.hero h1 { margin: 0 0 8px; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    header.hero p { margin: 0; opacity: 0.92; font-size: 1.02rem; }
+    .pills { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.32); padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+
+    h2 {
+        font-size: 1.4rem;
+        margin: 46px 0 14px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--line);
+        scroll-margin-top: 20px;
+        letter-spacing: -0.01em;
+    }
+    h2 .num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 8px;
+        background: var(--brand); color: #fff; font-size: 0.95rem; margin-right: 10px; vertical-align: 2px;
+    }
+    h3 { font-size: 1.08rem; margin: 26px 0 8px; }
+    p { margin: 10px 0; }
+    ul, ol { margin: 10px 0; padding-left: 22px; }
+    li { margin: 5px 0; }
+    a { color: var(--brand); }
+
+    code {
+        background: #eef1f6;
+        padding: 1.5px 6px;
+        border-radius: 5px;
+        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.86em;
+        color: #b4006e;
+        word-break: break-word;
+    }
+    pre {
+        background: var(--code-bg);
+        color: var(--code-ink);
+        padding: 16px 18px;
+        border-radius: 10px;
+        overflow-x: auto;
+        font-size: 0.84rem;
+        line-height: 1.5;
+        margin: 14px 0;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    .cmt { color: #8b97a8; }
+
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
+    th { background: #f3f6fa; font-weight: 700; }
+    td code { font-size: 0.84em; }
+
+    .callout {
+        border-radius: 10px;
+        padding: 13px 16px 13px 44px;
+        margin: 16px 0;
+        position: relative;
+        font-size: 0.93rem;
+        border: 1px solid transparent;
+    }
+    .callout::before { position: absolute; left: 15px; top: 12px; font-size: 1.05rem; }
+    .callout.note   { background: var(--info-bg);  border-color: #c7d8fb; }
+    .callout.note::before { content: "💡"; }
+    .callout.warn   { background: var(--warn-bg);  border-color: #ffe2a8; }
+    .callout.warn::before { content: "⚠️"; }
+    .callout.ok     { background: var(--ok-bg);    border-color: #b9e6cd; }
+    .callout.ok::before { content: "✅"; }
+    .callout.danger { background: var(--danger-bg);border-color: #f6c7c2; }
+    .callout.danger::before { content: "🚫"; }
+    .callout strong { font-weight: 700; }
+
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li { padding-left: 28px; position: relative; }
+    .checklist li::before { content: "☐"; position: absolute; left: 0; color: var(--brand); font-size: 1.05rem; }
+
+    .kv { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 4px 18px; margin: 14px 0; }
+
+    footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--ink-dim); }
+
+    @media print {
+        aside { display: none; }
+        main { padding: 0; }
+        header.hero { margin: 0 0 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        pre { white-space: pre-wrap; }
+        h2 { page-break-after: avoid; }
+    }
+    @media (max-width: 820px) {
+        aside { display: none; }
+        main { padding: 24px; }
+        header.hero { margin: -24px -24px 24px; padding: 32px 24px; }
+    }
+</style>
+</head>
+<body>
+<div class="layout">
+    <aside>
+        <div class="brand">📸 Secure Photo Gallery</div>
+        <div class="sub">AWS Serverless Deployment Guide · CloudFront edition</div>
+        <nav>
+            <div class="grp">Get started</div>
+            <a href="#overview">Overview &amp; Architecture</a>
+            <a href="#prereqs">Prerequisites</a>
+            <a href="#resources">Resource Summary</a>
+            <div class="grp">Build (in order)</div>
+            <a href="#s1" class="step">1 · DynamoDB Table</a>
+            <a href="#s2" class="step">2 · S3 Buckets (private)</a>
+            <a href="#s3" class="step">3 · CloudFront + OAC</a>
+            <a href="#s4" class="step">4 · IAM Role</a>
+            <a href="#s5" class="step">5 · Lambda Functions</a>
+            <a href="#s6" class="step">6 · API Gateway</a>
+            <a href="#s7" class="step">7 · Cognito</a>
+            <a href="#s8" class="step">8 · Attach Authorizer</a>
+            <a href="#s9" class="step">9 · Deploy Frontend</a>
+            <a href="#s10" class="step">10 · Create Test User</a>
+            <a href="#s11" class="step">11 · Test the Flow</a>
+            <div class="grp">Reference</div>
+            <a href="#per-user">Per-User Isolation</a>
+            <a href="#cors">CORS &amp; OAC Policy</a>
+            <a href="#troubleshoot">Troubleshooting</a>
+            <a href="#cost">Cost Estimate</a>
+            <a href="#cleanup">Teardown / Cleanup</a>
+            <a href="#checklist">Final Checklist</a>
+        </nav>
+    </aside>
+
+    <main>
+        <header class="hero">
+            <h1>Secure Photo Gallery</h1>
+            <p>End-to-end deployment guide for the AWS serverless photo app — CloudFront, S3, Lambda, API Gateway, Cognito &amp; DynamoDB.</p>
+            <div class="pills">
+                <span class="pill">Region: ap-south-1</span>
+                <span class="pill">CloudFront + OAC</span>
+                <span class="pill">Private S3 + Presigned URLs</span>
+                <span class="pill">Cognito Auth</span>
+            </div>
+        </header>
+
+        <!-- ===================== OVERVIEW ===================== -->
+        <section id="overview">
+            <h2>Overview &amp; Architecture</h2>
+            <p>This is a secure, multi-user photo gallery. The static frontend is delivered over HTTPS by <strong>Amazon CloudFront</strong>, which reads the files from a <strong>private</strong> S3 bucket via <strong>Origin Access Control (OAC)</strong> — the bucket itself is never public. Users authenticate through a Cognito hosted UI, upload images to a separate <strong>private</strong> data bucket, and view <strong>only their own</strong> photos. The browser never holds S3 credentials; Lambda issues short-lived <em>presigned URLs</em> for every upload and view.</p>
+            <pre><code>                         ┌──────────────────────────────┐
+   Browser  ──HTTPS──▶    │  Amazon CloudFront (CDN)     │
+   (app UI)              │  · Default root: index.html  │
+       ▲                 │  · OAC (SigV4 signed)        │
+       │                 └───────────────┬──────────────┘
+       │                                 │ reads site files (private)
+       │                                 ▼
+       │                 ┌──────────────────────────────┐
+       │                 │  S3: hosting bucket (PRIVATE)│  ← bucket policy allows
+       │                 │  index.html, logo.png        │    only this distribution
+       │                 └──────────────────────────────┘
+       │
+       │  1. Sign in (OAuth implicit) ───────────────▶ Cognito Hosted UI ──▶ id_token (JWT)
+       │
+       │  2. POST /photos  (Authorization: id_token)
+       ▼
+   API Gateway (REST) ──[Cognito Authorizer validates JWT]──▶ Lambda: uploadPhoto
+       │                                                          │ writes metadata + userSub
+       │                                                          ▼
+       │                                                      DynamoDB (PhotoGallery)
+       │  ◀── presigned PUT URL (5 min) ──────────────────────────┘
+       │  3. PUT file directly to S3 (private DATA bucket)
+       │
+       │  4. GET /photos  (Authorization: id_token)
+       ▼
+   API Gateway ──[Authorizer]──▶ Lambda: listPhotos ──▶ DynamoDB (filter by userSub)
+       │  ◀── list + presigned GET URLs (15 min) ──┘
+       ▼
+   Browser renders the signed-in user's photos (img src = presigned S3 URL)</code></pre>
+            <div class="callout note"><strong>Two private buckets, two jobs.</strong> The <em>hosting</em> bucket serves the website but only through CloudFront (OAC). The <em>data</em> bucket stores photos and is reached only via Lambda-issued presigned URLs. Neither bucket is public.</div>
+            <div class="callout note"><strong>What changed vs. S3 website hosting?</strong> The site is no longer served from the public S3 website endpoint. CloudFront sits in front of a private bucket, giving you HTTPS, a CDN edge cache, and no public bucket. The app URL becomes <code>https://&lt;dist-id&gt;.cloudfront.net/</code>. The frontend code is unchanged — it derives its OAuth redirect URI from the current page URL at runtime.</div>
+        </section>
+
+        <!-- ===================== PREREQS ===================== -->
+        <section id="prereqs">
+            <h2>Prerequisites</h2>
+            <ul>
+                <li>An AWS account with permissions for S3, CloudFront, Lambda, API Gateway, Cognito, DynamoDB and IAM.</li>
+                <li><strong>AWS CLI v2</strong> configured (<code>aws configure</code>) — optional, used for the CLI shortcuts.</li>
+                <li>A modern browser. For local testing, the <em>Live Server</em> VS Code extension (serves on <code>localhost:5500</code>).</li>
+                <li>Project files: <code>lambda/uploadPhoto.py</code>, <code>lambda/listPhotos.py</code>, <code>s3/index.html</code>, <code>s3/logo.png</code>.</li>
+            </ul>
+            <div class="callout warn"><strong>Region rule.</strong> Put S3, Lambda, API Gateway, Cognito and DynamoDB all in <code>ap-south-1</code>. CloudFront is global (no region) and its default certificate already covers <code>*.cloudfront.net</code>, so HTTPS works out of the box.</div>
+        </section>
+
+        <!-- ===================== RESOURCE SUMMARY ===================== -->
+        <section id="resources">
+            <h2>Resource Summary</h2>
+            <p>Live values wired into <code>s3/index.html</code>. The CloudFront domain is created in Step 3 — fill it into Cognito (Step 7) and use it as your app URL. S3 bucket names are globally unique; adjust if taken.</p>
+            <table>
+                <tr><th>Resource</th><th>Name / Value</th><th>Notes</th></tr>
+                <tr><td>Region</td><td><code>ap-south-1</code></td><td>Mumbai (CloudFront itself is global)</td></tr>
+                <tr><td>DynamoDB table</td><td><code>PhotoGallery</code></td><td>Partition key <code>photoId</code> (String)</td></tr>
+                <tr><td>Data bucket (private)</td><td><code>aviz-photo-secure-data-hosting</code></td><td>Stores photos; block all public access</td></tr>
+                <tr><td>Hosting bucket (private)</td><td><code>aviz-photo-static-web-hosting</code></td><td>Site files; readable only by CloudFront via OAC</td></tr>
+                <tr><td>CloudFront distribution</td><td><code>&lt;dist-id&gt;.cloudfront.net</code></td><td>Serves the site over HTTPS — <strong>this is the app URL</strong></td></tr>
+                <tr><td>Lambda — upload</td><td><code>uploadPhoto</code></td><td>Generates presigned PUT URL</td></tr>
+                <tr><td>Lambda — list</td><td><code>listPhotos</code></td><td>Lists user's photos + presigned GET URLs</td></tr>
+                <tr><td>API Gateway</td><td><code>PhotoGalleryAPI</code></td><td>REST, Regional</td></tr>
+                <tr><td>API invoke URL</td><td><code>https://xgq35x32mg.execute-api.ap-south-1.amazonaws.com/prod</code></td><td>Stage: <code>prod</code></td></tr>
+                <tr><td>Cognito User Pool</td><td><code>PhotoGalleryUsers</code></td><td>Hosted UI enabled</td></tr>
+                <tr><td>Cognito domain</td><td><code>avizway.auth.ap-south-1.amazoncognito.com</code></td><td>Hosted UI domain</td></tr>
+                <tr><td>Cognito App Client ID</td><td><code>2uuqj6jihv0obq9glvsvei72ce</code></td><td>Public client (no secret)</td></tr>
+            </table>
+        </section>
+
+        <!-- ===================== STEP 1 ===================== -->
+        <section id="s1">
+            <h2><span class="num">1</span>Create the DynamoDB Table</h2>
+            <p>One metadata item per uploaded photo (including the owner's Cognito <code>userSub</code>).</p>
+            <h3>Console</h3>
+            <ol>
+                <li>DynamoDB → <strong>Create table</strong>.</li>
+                <li>Table name: <code>PhotoGallery</code></li>
+                <li>Partition key: <code>photoId</code> — type <strong>String</strong>. (No sort key.)</li>
+                <li>Capacity: <strong>On-demand</strong>.</li>
+                <li>Create table.</li>
+            </ol>
+            <h3>CLI</h3>
+            <pre><code>aws dynamodb create-table \
+  --table-name PhotoGallery \
+  --attribute-definitions AttributeName=photoId,AttributeType=S \
+  --key-schema AttributeName=photoId,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region ap-south-1</code></pre>
+            <div class="callout note">DynamoDB is schemaless — the other fields (<code>filename</code>, <code>s3Key</code>, <code>userSub</code>, <code>userEmail</code>…) are written by Lambda at upload time.</div>
+        </section>
+
+        <!-- ===================== STEP 2 ===================== -->
+        <section id="s2">
+            <h2><span class="num">2</span>Create the S3 Buckets (both private)</h2>
+            <p>Two buckets, both with <strong>Block all public access ENABLED</strong>. Bucket names are globally unique — adjust if taken.</p>
+
+            <h3>2a · Private data bucket — <code>aviz-photo-secure-data-hosting</code></h3>
+            <ol>
+                <li>S3 → <strong>Create bucket</strong> in <code>ap-south-1</code>.</li>
+                <li>Keep <strong>“Block all public access” ENABLED</strong>.</li>
+                <li>Create the bucket.</li>
+                <li>Open it → <strong>Permissions → CORS</strong> → paste the JSON from the <a href="#cors">CORS reference</a> (required for presigned PUT uploads / GET views from the browser).</li>
+            </ol>
+            <pre><code><span class="cmt"># CLI equivalent</span>
+aws s3api create-bucket --bucket aviz-photo-secure-data-hosting \
+  --region ap-south-1 --create-bucket-configuration LocationConstraint=ap-south-1
+
+aws s3api put-bucket-cors --bucket aviz-photo-secure-data-hosting \
+  --cors-configuration file://s3/cors.txt --region ap-south-1</code></pre>
+
+            <h3>2b · Private hosting bucket — <code>aviz-photo-static-web-hosting</code></h3>
+            <ol>
+                <li>S3 → <strong>Create bucket</strong> in <code>ap-south-1</code>.</li>
+                <li>Keep <strong>“Block all public access” ENABLED</strong>. (CloudFront, not the public internet, will read it.)</li>
+                <li><strong>Do NOT</strong> enable static website hosting, and <strong>do not</strong> add a public bucket policy. The OAC policy is added in Step 3.</li>
+                <li>Create the bucket.</li>
+            </ol>
+            <pre><code>aws s3api create-bucket --bucket aviz-photo-static-web-hosting \
+  --region ap-south-1 --create-bucket-configuration LocationConstraint=ap-south-1</code></pre>
+            <div class="callout warn"><strong>Don't upload the frontend yet.</strong> <code>index.html</code> needs the API URL, Cognito domain and Client ID first — you'll set those and upload in <a href="#s9">Step 9</a>, then invalidate the CloudFront cache.</div>
+        </section>
+
+        <!-- ===================== STEP 3 (CLOUDFRONT) ===================== -->
+        <section id="s3">
+            <h2><span class="num">3</span>Create the CloudFront Distribution (with OAC)</h2>
+            <p>CloudFront serves the site over HTTPS and is the only thing allowed to read the private hosting bucket.</p>
+            <h3>Console</h3>
+            <ol>
+                <li>CloudFront → <strong>Create distribution</strong>.</li>
+                <li><strong>Origin domain:</strong> choose your hosting bucket from the list. <strong>Pick the bucket's REST endpoint</strong> (e.g. <code>aviz-photo-static-web-hosting.s3.ap-south-1.amazonaws.com</code>), <em>not</em> a “website endpoint”.</li>
+                <li><strong>Origin access:</strong> select <strong>Origin access control settings (recommended)</strong> → <strong>Create new OAC</strong> → keep defaults (Sign requests, SigV4) → Create.</li>
+                <li><strong>Viewer protocol policy:</strong> <strong>Redirect HTTP to HTTPS</strong>.</li>
+                <li><strong>Default root object:</strong> <code>index.html</code>. <em>(Critical — without it, opening <code>/</code> returns AccessDenied.)</em></li>
+                <li>Leave WAF off for now. Create the distribution.</li>
+                <li>CloudFront shows a banner: <strong>“The S3 bucket policy needs to be updated.”</strong> Click <strong>Copy policy</strong>, then go to the hosting bucket → <strong>Permissions → Bucket policy → Edit</strong> → paste → Save. (This is the OAC policy shown in the <a href="#cors">reference</a>.)</li>
+                <li>Wait until <strong>Status = Deployed</strong> (~5–15 min). Note the <strong>Distribution domain name</strong>, e.g. <code>d1234abcd.cloudfront.net</code> — this is your app URL.</li>
+            </ol>
+            <div class="callout warn"><strong>REST endpoint, not website endpoint.</strong> OAC only works with the S3 REST/API endpoint (it signs requests with SigV4). If you point the origin at an S3 <em>website</em> endpoint, OAC signing won't apply and you'll get 403s. The console's bucket picker gives you the REST endpoint by default.</div>
+            <div class="callout note"><strong>Default root object only covers <code>/</code>.</strong> This app is a single page at the root, so <code>index.html</code> is enough. (If you later add client-side routes, add a custom error response mapping 403/404 → <code>/index.html</code>.)</div>
+        </section>
+
+        <!-- ===================== STEP 4 ===================== -->
+        <section id="s4">
+            <h2><span class="num">4</span>Create the IAM Role for Lambda</h2>
+            <p>Both Lambda functions share one execution role.</p>
+            <ol>
+                <li>IAM → <strong>Roles</strong> → <strong>Create role</strong> → Trusted entity: <strong>AWS service → Lambda</strong>.</li>
+                <li>Attach:
+                    <ul>
+                        <li><code>AWSLambdaBasicExecutionRole</code> — CloudWatch Logs.</li>
+                        <li><code>AmazonDynamoDBFullAccess</code> — read/write the metadata table.</li>
+                        <li><code>AmazonS3FullAccess</code> — generate presigned URLs &amp; read/write objects.</li>
+                    </ul>
+                </li>
+                <li>Name it <code>PhotoGalleryLambdaRole</code> and create.</li>
+            </ol>
+            <div class="callout note"><strong>Least-privilege upgrade (production).</strong> Scope the <code>*FullAccess</code> policies down to the specific table ARN and the <strong>data</strong> bucket ARN, allowing only <code>dynamodb:PutItem/Scan/Query</code> and <code>s3:PutObject/GetObject</code>.</div>
+        </section>
+
+        <!-- ===================== STEP 5 ===================== -->
+        <section id="s5">
+            <h2><span class="num">5</span>Create the Lambda Functions</h2>
+            <p>Two functions, both <strong>Python 3.12</strong>, both using the Step 4 role.</p>
+
+            <h3>5a · <code>uploadPhoto</code></h3>
+            <ol>
+                <li>Lambda → <strong>Create function</strong> → Author from scratch.</li>
+                <li>Name: <code>uploadPhoto</code> · Runtime: <strong>Python 3.12</strong> · Role: <code>PhotoGalleryLambdaRole</code>.</li>
+                <li>Paste the code from <code>lambda/uploadPhoto.py</code> and <strong>Deploy</strong>.</li>
+                <li><strong>Configuration → Environment variables</strong>:
+                    <div class="kv"><p><code>PHOTO_BUCKET_NAME</code> = <code>aviz-photo-secure-data-hosting</code></p></div>
+                </li>
+                <li><strong>Configuration → General</strong> → <strong>Timeout: 30 seconds</strong>.</li>
+            </ol>
+
+            <h3>5b · <code>listPhotos</code></h3>
+            <ol>
+                <li>Create function <code>listPhotos</code>, same runtime and role.</li>
+                <li>Paste the code from <code>lambda/listPhotos.py</code> and <strong>Deploy</strong>.</li>
+                <li>Add env var <code>PHOTO_BUCKET_NAME = aviz-photo-secure-data-hosting</code>.</li>
+                <li>Timeout: 30 seconds.</li>
+            </ol>
+            <div class="callout note">The table name <code>PhotoGallery</code> is hard-coded as <code>TABLE_NAME</code> in both files. If your table differs, edit that constant.</div>
+            <div class="callout ok"><strong>Per-user isolation is built in.</strong> <code>listPhotos</code> reads the caller's Cognito <code>userSub</code> from the authorizer claims and returns only that user's photos — see <a href="#per-user">Per-User Isolation</a>.</div>
+        </section>
+
+        <!-- ===================== STEP 6 ===================== -->
+        <section id="s6">
+            <h2><span class="num">6</span>Create the API Gateway</h2>
+            <h3>6a · REST API and resource</h3>
+            <ol>
+                <li>API Gateway → <strong>Create API</strong> → <strong>REST API</strong> → Build.</li>
+                <li>Name: <code>PhotoGalleryAPI</code> · Endpoint type: <strong>Regional</strong>.</li>
+                <li><strong>Create Resource</strong> → name <code>photos</code> (path <code>/photos</code>) → tick <strong>Enable API Gateway CORS</strong>.</li>
+            </ol>
+            <h3>6b · Methods</h3>
+            <ol>
+                <li><code>/photos</code> → <strong>Create Method → GET</strong>: Lambda Function, <strong>Lambda Proxy integration ON</strong>, function <code>listPhotos</code>.</li>
+                <li><code>/photos</code> → <strong>Create Method → POST</strong>: Lambda proxy ON, function <code>uploadPhoto</code>.</li>
+            </ol>
+            <div class="callout warn"><strong>Lambda Proxy integration must be ON.</strong> The code reads <code>event['requestContext']['authorizer']['claims']</code> and <code>event['body']</code>, which only exist with proxy integration.</div>
+            <h3>6c · CORS on the resource</h3>
+            <p>Select <code>/photos</code> → <strong>Enable CORS</strong>. Allow these headers:</p>
+            <pre><code>Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token</code></pre>
+            <p>Allow methods <code>GET, POST, OPTIONS</code>. For origin, use your CloudFront URL in production (e.g. <code>https://d1234abcd.cloudfront.net</code>) or <code>*</code> for a demo.</p>
+            <h3>6d · Deploy to a stage</h3>
+            <ol>
+                <li><strong>Deploy API</strong> → New stage → name <code>prod</code>.</li>
+                <li>Copy the <strong>Invoke URL</strong>, e.g. <code>https://xgq35x32mg.execute-api.ap-south-1.amazonaws.com/prod</code> (needed in Step 9).</li>
+            </ol>
+            <div class="callout note">You'll deploy <em>again</em> after attaching the Cognito authorizer (Step 8).</div>
+        </section>
+
+        <!-- ===================== STEP 7 ===================== -->
+        <section id="s7">
+            <h2><span class="num">7</span>Set Up Cognito Authentication</h2>
+            <h3>7a · User Pool</h3>
+            <ol>
+                <li>Cognito → <strong>Create user pool</strong>. Sign-in option: <strong>Email</strong>.</li>
+                <li>Pool name: <code>PhotoGalleryUsers</code>.</li>
+                <li>Optionally disable “Prevent user existence errors” for easier demo debugging (re-enable for production).</li>
+            </ol>
+            <h3>7b · App Client</h3>
+            <ol>
+                <li>Create a <strong>public app client</strong> with <strong>no client secret</strong> (browser app).</li>
+                <li>Enable auth flows: <code>ALLOW_USER_SRP_AUTH</code>, <code>ALLOW_CUSTOM_AUTH</code>, <code>ALLOW_REFRESH_TOKEN_AUTH</code>.</li>
+                <li>Note the <strong>App client ID</strong> (e.g. <code>2uuqj6jihv0obq9glvsvei72ce</code>) for Step 9.</li>
+            </ol>
+            <h3>7c · Hosted UI domain</h3>
+            <p>App integration → Domain → create e.g. <code>avizway</code> → <code>avizway.auth.ap-south-1.amazoncognito.com</code>.</p>
+            <h3>7d · Hosted UI / OAuth settings</h3>
+            <ul>
+                <li><strong>Identity providers:</strong> Cognito user pool.</li>
+                <li><strong>OAuth grant type:</strong> <strong>Implicit grant</strong>.</li>
+                <li><strong>Scopes:</strong> <code>email</code>, <code>openid</code>.</li>
+                <li><strong>Allowed callback URLs</strong> — use your <strong>CloudFront</strong> domain (add both forms, plus localhost for dev):
+                    <pre><code>https://d1234abcd.cloudfront.net/
+https://d1234abcd.cloudfront.net/index.html
+http://localhost:5500/index.html</code></pre>
+                </li>
+                <li><strong>Allowed sign-out URLs:</strong> the same set.</li>
+            </ul>
+            <div class="callout danger"><strong>Callback URL must match exactly.</strong> The frontend uses <code>window.location.href</code> (minus the hash) as the redirect URI. Opening <code>https://d123.cloudfront.net/</code> sends <code>…/</code>; opening <code>…/index.html</code> sends <code>…/index.html</code>. Register <strong>both</strong> so either entry point works — otherwise you get a <em>redirect_mismatch</em> error.</div>
+            <div class="callout note">Replace <code>d1234abcd.cloudfront.net</code> everywhere with your real distribution domain from Step 3.</div>
+        </section>
+
+        <!-- ===================== STEP 8 ===================== -->
+        <section id="s8">
+            <h2><span class="num">8</span>Attach the Cognito Authorizer to API Gateway</h2>
+            <ol>
+                <li>API Gateway → <code>PhotoGalleryAPI</code> → <strong>Authorizers → Create New Authorizer</strong>.</li>
+                <li>Type: <strong>Cognito</strong> · Name: <code>CognitoAuth</code> · User pool: <code>PhotoGalleryUsers</code>.</li>
+                <li><strong>Token source:</strong> <code>Authorization</code> (exactly this — <em>not</em> “Bearer Authorization”).</li>
+                <li>For <strong>both</strong> GET and POST: <strong>Method Request</strong> → set <strong>Authorization</strong> to <code>CognitoAuth</code>.</li>
+                <li><strong>Deploy API → prod</strong> to apply.</li>
+            </ol>
+            <div class="callout warn">The frontend sends the raw <code>id_token</code> (no <code>Bearer </code> prefix). Keep the token source as <code>Authorization</code> to match.</div>
+        </section>
+
+        <!-- ===================== STEP 9 ===================== -->
+        <section id="s9">
+            <h2><span class="num">9</span>Configure, Upload &amp; Invalidate the Frontend</h2>
+            <p>Edit the two config blocks near the top of the <code>&lt;script&gt;</code> in <code>s3/index.html</code>:</p>
+            <pre><code>const COGNITO_CONFIG = {
+    domain: 'avizway.auth.ap-south-1.amazoncognito.com',   <span class="cmt">// Step 7c</span>
+    clientId: '2uuqj6jihv0obq9glvsvei72ce',                <span class="cmt">// Step 7b</span>
+    redirectUri: window.location.href.split('#')[0],       <span class="cmt">// auto → CloudFront URL</span>
+    region: 'ap-south-1'
+};
+
+const CONFIG = {
+    API_URL: 'https://xgq35x32mg.execute-api.ap-south-1.amazonaws.com/prod', <span class="cmt">// Step 6d</span>
+    S3_BUCKET_NAME: 'aviz-photo-secure-data-hosting',      <span class="cmt">// DATA bucket (Step 2a)</span>
+    AWS_REGION: 'ap-south-1',
+    S3_REGION: 'ap-south-1'
+};</code></pre>
+            <p>Upload the site files to the <strong>hosting</strong> bucket, then <strong>invalidate the CloudFront cache</strong> so edges fetch the new version:</p>
+            <pre><code>aws s3 cp s3/index.html s3://aviz-photo-static-web-hosting/index.html --region ap-south-1
+aws s3 cp s3/logo.png  s3://aviz-photo-static-web-hosting/logo.png  --region ap-south-1
+
+<span class="cmt"># Bust the CDN cache (replace with your distribution ID)</span>
+aws cloudfront create-invalidation --distribution-id E123ABCXYZ --paths "/*"</code></pre>
+            <p>Your live URL is the CloudFront domain:</p>
+            <div class="kv"><p><code>https://d1234abcd.cloudfront.net/</code></p></div>
+            <div class="callout warn"><strong>Always invalidate after re-uploading <code>index.html</code>.</strong> CloudFront caches at the edge; without an invalidation (or versioned filenames) users keep getting the old page. <code>/*</code> invalidations are free up to 1,000 paths/month.</div>
+            <div class="callout note">Confirm this exact CloudFront URL is in the Cognito callback &amp; sign-out lists (Step 7d), or sign-in fails.</div>
+        </section>
+
+        <!-- ===================== STEP 10 ===================== -->
+        <section id="s10">
+            <h2><span class="num">10</span>Create a Test User</h2>
+            <p>Either self-register via the hosted UI's <em>Sign up</em> link, or create one manually:</p>
+            <ol>
+                <li>Cognito → <code>PhotoGalleryUsers</code> → <strong>Users → Create user</strong>.</li>
+                <li>Enter an email, set a password, mark email verified / password permanent for testing.</li>
+            </ol>
+            <pre><code>aws cognito-idp admin-create-user --user-pool-id &lt;POOL_ID&gt; \
+  --username you@example.com --region ap-south-1
+
+aws cognito-idp admin-set-user-password --user-pool-id &lt;POOL_ID&gt; \
+  --username you@example.com --password '&lt;StrongPassw0rd!&gt;' \
+  --permanent --region ap-south-1</code></pre>
+            <div class="callout danger"><strong>Never commit real passwords</strong> to source files or version control. Rotate any password that has been written to a shared file.</div>
+        </section>
+
+        <!-- ===================== STEP 11 ===================== -->
+        <section id="s11">
+            <h2><span class="num">11</span>Test the Full Flow</h2>
+            <ol>
+                <li>Open <code>https://&lt;dist-id&gt;.cloudfront.net/</code> → sign-in overlay appears over HTTPS.</li>
+                <li>Click <strong>Sign In with Cognito</strong> → authenticate → redirected back with a token; your email shows in the header chip.</li>
+                <li>Drag a photo in → preview → <strong>Upload Photo</strong> → success toast.</li>
+                <li>Photo appears in <strong>Your Photos</strong>; click it for the lightbox.</li>
+                <li><strong>Isolation check:</strong> sign in as a <em>second</em> user and confirm they do <strong>not</strong> see the first user's photos.</li>
+            </ol>
+            <div class="callout ok"><strong>Where to look when something fails:</strong> browser DevTools <em>Console</em> + <em>Network</em> for the failing request, and CloudWatch Logs at <code>/aws/lambda/uploadPhoto</code> and <code>/aws/lambda/listPhotos</code>.</div>
+        </section>
+
+        <!-- ===================== PER-USER ===================== -->
+        <section id="per-user">
+            <h2>Per-User Photo Isolation</h2>
+            <p>On upload, <code>uploadPhoto</code> stamps each item with the owner's identity from the authorizer claims:</p>
+            <pre><code>user_sub = event['requestContext']['authorizer']['claims']['sub']
+<span class="cmt"># stored on the item as userSub (and userEmail)</span></code></pre>
+            <p><code>listPhotos</code> returns only items belonging to the caller, using a filtered, paginated scan:</p>
+            <pre><code>from boto3.dynamodb.conditions import Attr
+
+scan_kwargs = {'FilterExpression': Attr('userSub').eq(user_sub)}
+<span class="cmt"># loops on LastEvaluatedKey so users with &gt;1MB of metadata still see everything</span></code></pre>
+            <div class="callout note"><strong>Scaling note.</strong> A filtered <code>Scan</code> still reads every row before discarding non-matches — fine for a demo. For production, add a <strong>Global Secondary Index</strong> with partition key <code>userSub</code> and switch to <code>table.query()</code>.</div>
+        </section>
+
+        <!-- ===================== CORS / OAC ===================== -->
+        <section id="cors">
+            <h2>Reference: CORS &amp; OAC Bucket Policy</h2>
+
+            <h3>CORS — apply to the PRIVATE data bucket</h3>
+            <p>Required so the browser can <code>PUT</code> (upload) and <code>GET</code> (view) via presigned URLs.</p>
+            <pre><code>[
+    {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["GET", "PUT", "POST"],
+        "AllowedOrigins": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3000
+    }
+]</code></pre>
+            <div class="callout warn">For production, replace <code>"AllowedOrigins": ["*"]</code> with your CloudFront origin, e.g. <code>"https://d1234abcd.cloudfront.net"</code>.</div>
+
+            <h3>OAC bucket policy — apply to the PRIVATE hosting bucket</h3>
+            <p>Grants <strong>only your CloudFront distribution</strong> read access. CloudFront generates this for you in Step 3 (the “Copy policy” banner); it looks like this — substitute your account ID and distribution ID:</p>
+            <pre><code>{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowCloudFrontServicePrincipalReadOnly",
+            "Effect": "Allow",
+            "Principal": { "Service": "cloudfront.amazonaws.com" },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::aviz-photo-static-web-hosting/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "arn:aws:cloudfront::&lt;ACCOUNT_ID&gt;:distribution/&lt;DIST_ID&gt;"
+                }
+            }
+        }
+    ]
+}</code></pre>
+            <div class="callout danger"><strong>No public-read policy anywhere.</strong> With CloudFront + OAC, neither bucket gets a <code>"Principal": "*"</code> read policy. If you copied the old static-website public policy, remove it.</div>
+        </section>
+
+        <!-- ===================== TROUBLESHOOT ===================== -->
+        <section id="troubleshoot">
+            <h2>Troubleshooting</h2>
+            <table>
+                <tr><th>Symptom</th><th>Likely cause &amp; fix</th></tr>
+                <tr><td><strong>CloudFront returns AccessDenied at <code>/</code></strong></td><td>No <strong>Default root object</strong> set. CloudFront → Distribution → General → Settings → set <code>index.html</code>.</td></tr>
+                <tr><td><strong>403 from CloudFront for every file</strong></td><td>OAC bucket policy missing/wrong, or origin points at the S3 <em>website</em> endpoint instead of the REST endpoint. Re-copy the policy (Step 3) and verify the origin domain ends in <code>.s3.ap-south-1.amazonaws.com</code>.</td></tr>
+                <tr><td><strong>Old version of the site keeps loading</strong></td><td>Edge cache. Run <code>create-invalidation --paths "/*"</code> after every <code>index.html</code> upload (Step 9).</td></tr>
+                <tr><td><strong>redirect_mismatch at login</strong></td><td>The current page URL isn't in Cognito's callback URLs. Register both <code>https://&lt;dist&gt;.cloudfront.net/</code> and <code>…/index.html</code> (Step 7d).</td></tr>
+                <tr><td><strong>Distribution stuck “Deploying”</strong></td><td>Normal — initial deploy takes 5–15 min. Wait for Status = Deployed before testing.</td></tr>
+                <tr><td><strong>401 Unauthorized</strong> on upload/list</td><td>Authorizer token source isn't <code>Authorization</code>, or the API wasn't redeployed after attaching the authorizer (Step 8).</td></tr>
+                <tr><td><strong>“PHOTO_BUCKET_NAME environment variable not set”</strong></td><td>Add the env var to <strong>both</strong> Lambdas (Step 5).</td></tr>
+                <tr><td><strong>CORS error</strong> on upload</td><td>Data bucket missing CORS (Step 2a) and/or CORS not enabled on the API resource (Step 6c).</td></tr>
+                <tr><td><strong>Broken thumbnails</strong></td><td>Presigned URL expired (15 min) — reload. Or Lambda lacks S3 perms — check the IAM role and CloudWatch.</td></tr>
+                <tr><td><strong>Upload returns 403 from S3</strong></td><td>Content-Type on the <code>PUT</code> doesn't match the signed type, or the presigned URL expired (5 min).</td></tr>
+                <tr><td><strong>User sees others' photos</strong></td><td>Old <code>listPhotos</code> doing an unfiltered <code>scan()</code>. Deploy the version that filters by <code>userSub</code>.</td></tr>
+            </table>
+        </section>
+
+        <!-- ===================== COST ===================== -->
+        <section id="cost">
+            <h2>Cost Estimate</h2>
+            <p>Light usage (≈1,000 photos, ≈10,000 views/month) — mostly within the AWS Free Tier:</p>
+            <table>
+                <tr><th>Service</th><th>Est. monthly</th></tr>
+                <tr><td>CloudFront (1 TB free/12 mo; then ~$0.085/GB out)</td><td>~$0.00–0.20</td></tr>
+                <tr><td>S3 (storage + requests)</td><td>~$0.50</td></tr>
+                <tr><td>Lambda (invocations)</td><td>~$0.20</td></tr>
+                <tr><td>API Gateway (calls)</td><td>~$0.35</td></tr>
+                <tr><td>DynamoDB (on-demand R/W)</td><td>~$0.25</td></tr>
+                <tr><td>Cognito (&lt; 50k MAU)</td><td>Free</td></tr>
+                <tr><th>Total</th><th>~$1.30–1.50 / month</th></tr>
+            </table>
+        </section>
+
+        <!-- ===================== CLEANUP ===================== -->
+        <section id="cleanup">
+            <h2>Teardown / Cleanup</h2>
+            <ol>
+                <li>CloudFront → <strong>Disable</strong> the distribution → wait until Deployed → <strong>Delete</strong>. (You can't delete an enabled distribution.)</li>
+                <li><strong>Empty</strong> both S3 buckets, then delete them.</li>
+                <li>Delete the API Gateway <code>PhotoGalleryAPI</code>.</li>
+                <li>Delete the two Lambda functions.</li>
+                <li>Delete the Cognito user pool <code>PhotoGalleryUsers</code> (and its domain).</li>
+                <li>Delete the DynamoDB table <code>PhotoGallery</code>.</li>
+                <li>Delete the IAM role <code>PhotoGalleryLambdaRole</code> and the Lambda CloudWatch log groups.</li>
+            </ol>
+            <pre><code>aws s3 rm s3://aviz-photo-secure-data-hosting --recursive --region ap-south-1
+aws s3 rm s3://aviz-photo-static-web-hosting --recursive --region ap-south-1
+aws s3api delete-bucket --bucket aviz-photo-secure-data-hosting --region ap-south-1
+aws s3api delete-bucket --bucket aviz-photo-static-web-hosting --region ap-south-1
+aws dynamodb delete-table --table-name PhotoGallery --region ap-south-1
+<span class="cmt"># CloudFront: disable in console first, then delete (or use update-distribution + delete-distribution with ETag)</span></code></pre>
+            <div class="callout danger"><strong>Irreversible.</strong> Emptying buckets permanently destroys all uploaded photos and the website.</div>
+        </section>
+
+        <!-- ===================== CHECKLIST ===================== -->
+        <section id="checklist">
+            <h2>Final Deployment Checklist</h2>
+            <ul class="checklist">
+                <li>DynamoDB table <code>PhotoGallery</code> with <code>photoId</code> partition key.</li>
+                <li>Data bucket created — public access blocked, CORS applied.</li>
+                <li>Hosting bucket created — public access blocked, <strong>no</strong> website hosting, <strong>no</strong> public policy.</li>
+                <li>CloudFront distribution created with OAC, default root object <code>index.html</code>, HTTP→HTTPS redirect.</li>
+                <li>OAC bucket policy pasted onto the hosting bucket; Status = Deployed.</li>
+                <li>IAM role with Lambda Basic Execution + DynamoDB + S3 access.</li>
+                <li>Both Lambdas deployed with <code>PHOTO_BUCKET_NAME</code> env var and 30s timeout.</li>
+                <li>REST API <code>/photos</code>: GET→listPhotos, POST→uploadPhoto (proxy integration); CORS enabled; deployed to <code>prod</code>.</li>
+                <li>Cognito pool + public app client + hosted UI domain.</li>
+                <li>Implicit grant, <code>email</code>+<code>openid</code> scopes; callback &amp; sign-out URLs = CloudFront URL (both <code>/</code> and <code>/index.html</code>).</li>
+                <li>Cognito authorizer attached to GET &amp; POST; API <strong>redeployed</strong>.</li>
+                <li><code>index.html</code> config updated, uploaded to hosting bucket, CloudFront <strong>invalidated</strong>.</li>
+                <li>Test user created; full upload → view → lightbox flow works over the CloudFront URL.</li>
+                <li>Second user confirms they see only their own photos.</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>Secure Photo Gallery — AWS Serverless Deployment Guide (CloudFront edition). Region <code>ap-south-1</code>. Print to PDF via your browser (Ctrl/Cmd&nbsp;+&nbsp;P) for a shareable copy.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

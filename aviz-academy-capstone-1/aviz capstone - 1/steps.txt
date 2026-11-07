@@ -1,0 +1,130 @@
+Step 1 : Create dynamodb tables
+
+TableName: PhotoGallery
+PartKey: photoId
+
+---
+
+Step 2 : create an s3 bucket for 
+
+Data Storage: aviz-serverless-cap11-data-storage
+** We are not making it public. Make sure to add CORS on this data storage bucket. 
+
+Web hosting: aviz-serverless-cap11-web-hosting
+
+
+Created Cloudfront distribution for Web hosting bucket: 
+
+https://d15rjmjumcynsy.cloudfront.net
+
+---
+
+Step 3 ; Create IAM role : awar11-photogalleryrole
+* DynamoDB
+* S3 Full Access
+* Lambda basic Access execution
+
+---
+
+Step 4 : Create lambda functions
+
+uploadPhoto: 
+
+listPhotos:
+
+
+- Use the shared code. 
+- update lambda function timeout values 
+- Add required bucket as an environment variable. 
+- Use the IAM role we have created in step 3. 
+
+---
+
+APIGateway: 
+
+HTTP API : Modern serverless apps, simple microservcies.. 
+REST API : Enterprise apps that required proxy, Features: apikey, request validations, waf..
+WebSocker API : Chat apps, Multiplayer games, real time stremings : Bidirectional connection
+
+GET Request : Retrive the data from server.. 
+POST Request : Send data to server to create new resources
+
+- REST API
+- Name: PhotoGalleryAPI
+- Security Policy: SecurityPolicy_TLS13_1_2_2021_06
+- Create resource, Resource Name: /photos
+- Enable CORS
+
+Choose "photos", create "method" --> 
+Create method --> GET --> Lambda function --> ENable proxy integration --> choose "listPhotos"
+Create method --> POST --> Lambda function --> ENable proxy integration --> choose "uploadPhotos"
+
+choose "/photos" and enable CORS. Choose "GET, OPTIONS, POST".
+
+Choose api and deploy, Provide a stage name
+
+https://0kb2j856s3.execute-api.ap-south-1.amazonaws.com/prod
+
+----
+
+Cognito : this service helps us to add an authentication method for our application without building the logic from scratch. It is a fully managed identity and access management service that helps us to enable sign-in, sign-up, and user login validation features. 
+
+Create a userpool
+
+choose "App clients" --> edit 
+
+Sign in with secure remote password (SRP): ALLOW_USER_SRP_AUTH
+Sign in with custom authentication flows from Lambda triggers: ALLOW_CUSTOM_AUTH
+Get new user tokens from existing authenticated sessions: ALLOW_REFRESH_TOKEN_AUTH
+
+Disable "Prevent user existence errors"
+
+Navigate to "Login" --> edit and enter "callback" and "signout" URls.
+
+https://d15rjmjumcynsy.cloudfront.net
+https://d15rjmjumcynsy.cloudfront.net/index.html
+https://localhost:5500/index.html
+
+Identity providers: Cognito user pool
+OAuth 2.0 grant types: Implicit grant
+OpenID Connect scopes: Email and OpenID
+
+
+branding --> Domain --> delete
+Create cognito domain
+
+https://aviz11.auth.ap-south-1.amazoncognito.com
+
+
+---
+create authorisation in APi Gateway
+CognitoAuth 
+Choose "Authorizer type" : lambda
+Token source : Authorization
+
+---
+
+Choose "GET" --> Add "Authorization"--> choose "CognitoAuth" and deploy the stage again
+
+https://0kb2j856s3.execute-api.ap-south-1.amazonaws.com/prod
+
+---
+
+Update below info inside index.html file.. Line 568 - 582
+
+
+domain : aviz11.auth.ap-south-1.amazoncognito.com
+clientId : 296rju4sed5j7b6gck78vfv24o
+api URL : https://0kb2j856s3.execute-api.ap-south-1.amazonaws.com/prod
+Data storage bucket : aviz-serverless-cap11-data-storage
+
+
+
+
+
+
+
+
+
+
+

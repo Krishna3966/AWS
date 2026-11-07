@@ -1,0 +1,292 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    PHOTO GALLERY FIX - VISUAL GUIDE                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           THE PROBLEM                                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   User Browser                API Gateway              Lambda
+        │                           │                      │
+        │  POST /photos             │                      │
+        │  Authorization:           │                      │
+        │  Bearer <token>           │                      │
+        ├──────────────────────────>│                      │
+        │                           │                      │
+        │                           │  ❌ Invalid token    │
+        │                           │     format!          │
+        │                           │                      │
+        │  ❌ 401 Unauthorized       │                      │
+        │<──────────────────────────┤                      │
+        │                           │                      │
+        
+   Result: Upload fails! User sees error message.
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           THE SOLUTION                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   User Browser                API Gateway              Lambda              S3
+        │                           │                      │                │
+        │  POST /photos             │                      │                │
+        │  Authorization:           │                      │                │
+        │  <token>                  │                      │                │
+        ├──────────────────────────>│                      │                │
+        │                           │                      │                │
+        │                           │  ✅ Token valid!     │                │
+        │                           │                      │                │
+        │                           │  Invoke Lambda       │                │
+        │                           ├─────────────────────>│                │
+        │                           │                      │                │
+        │                           │                      │  Generate      │
+        │                           │                      │  presigned URL │
+        │                           │                      ├───────────────>│
+        │                           │                      │                │
+        │                           │  Return presigned    │                │
+        │                           │  URL                 │                │
+        │  ✅ 200 OK                │<─────────────────────┤                │
+        │  {uploadUrl: "..."}       │                      │                │
+        │<──────────────────────────┤                      │                │
+        │                           │                      │                │
+        │  PUT to presigned URL     │                      │                │
+        │  (with photo data)        │                      │                │
+        ├────────────────────────────────────────────────────────────────────>│
+        │                           │                      │                │
+        │  ✅ 200 OK                │                      │                │
+        │<────────────────────────────────────────────────────────────────────┤
+        │                           │                      │                │
+        
+   Result: Upload succeeds! Photo stored securely in private S3 bucket.
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        THE FIX (ONE LINE!)                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   File: s3/index.html
+
+   BEFORE (Line ~520):
+   ┌────────────────────────────────────────────────────────────────┐
+   │ headers: {                                                     │
+   │     'Content-Type': 'application/json',                        │
+   │     'Authorization': `Bearer ${idToken}`  // ❌ WRONG          │
+   │ }                                                              │
+   └────────────────────────────────────────────────────────────────┘
+
+   AFTER (Line ~520):
+   ┌────────────────────────────────────────────────────────────────┐
+   │ headers: {                                                     │
+   │     'Content-Type': 'application/json',                        │
+   │     'Authorization': idToken  // ✅ CORRECT                    │
+   │ }                                                              │
+   └────────────────────────────────────────────────────────────────┘
+
+   Same fix applied to GET /photos request (Line ~600)
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        DEPLOYMENT STEPS                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   Step 1: Deploy Fixed Code
+   ┌────────────────────────────────────────────────────────────────┐
+   │ $ chmod +x deploy.sh                                           │
+   │ $ ./deploy.sh                                                  │
+   │                                                                │
+   │ ✅ Updates Lambda functions                                    │
+   │ ✅ Sets environment variables                                  │
+   │ ✅ Uploads fixed frontend to S3                                │
+   └────────────────────────────────────────────────────────────────┘
+
+   Step 2: Verify API Gateway
+   ┌────────────────────────────────────────────────────────────────┐
+   │ AWS Console → API Gateway → PhotoGalleryAPI → Authorizers     │
+   │                                                                │
+   │ Check: Token Source = "Authorization"                         │
+   │        (NOT "Bearer Authorization")                           │
+   │                                                                │
+   │ If changed: Actions → Deploy API → Stage: prod                │
+   └────────────────────────────────────────────────────────────────┘
+
+   Step 3: Test Application
+   ┌────────────────────────────────────────────────────────────────┐
+   │ Open in browser (incognito mode):                             │
+   │ https://photos-sharing-aviz-hosting.s3.ap-south-1.            │
+   │        amazonaws.com/index.html                               │
+   │                                                                │
+   │ 1. Click "Sign In with Cognito"                               │
+   │ 2. Upload a test photo                                        │
+   │ 3. Verify it appears in gallery                               │
+   └────────────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        SUCCESS INDICATORS                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Login redirects back to app (no errors)
+   ✅ Upload shows: "Requesting secure upload URL..."
+   ✅ Upload shows: "Uploading to secure storage..."
+   ✅ Success message: "Photo uploaded securely!"
+   ✅ Photo appears in gallery with presigned URL
+   ✅ No errors in browser console (F12)
+   ✅ CloudWatch logs show successful Lambda invocations
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        TROUBLESHOOTING                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   Problem: 401 Unauthorized
+   ┌────────────────────────────────────────────────────────────────┐
+   │ Solution:                                                      │
+   │ 1. Check API Gateway Token Source = "Authorization"           │
+   │ 2. Sign out and sign in again (token may be expired)          │
+   │ 3. See CRITICAL_FIX.md for details                            │
+   └────────────────────────────────────────────────────────────────┘
+
+   Problem: 500 Internal Server Error
+   ┌────────────────────────────────────────────────────────────────┐
+   │ Solution:                                                      │
+   │ 1. Run ./deploy.sh to set environment variables               │
+   │ 2. Or manually set PHOTO_BUCKET_NAME in Lambda console        │
+   │ 3. Check CloudWatch logs for details                          │
+   └────────────────────────────────────────────────────────────────┘
+
+   Problem: CORS Error
+   ┌────────────────────────────────────────────────────────────────┐
+   │ Solution:                                                      │
+   │ $ aws s3api put-bucket-cors \                                 │
+   │     --bucket photos-sharing-aviz-data \                       │
+   │     --cors-configuration file://cors-config.json \            │
+   │     --region ap-south-1                                       │
+   └────────────────────────────────────────────────────────────────┘
+
+   Problem: Images Don't Load
+   ┌────────────────────────────────────────────────────────────────┐
+   │ Solution:                                                      │
+   │ 1. Check Lambda logs: /aws/lambda/listPhotos                 │
+   │ 2. Verify Lambda has s3:GetObject permission                  │
+   │ 3. Presigned URLs expire in 15 minutes - refresh gallery      │
+   └────────────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        ARCHITECTURE OVERVIEW                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   ┌─────────────┐
+   │   Browser   │  1. User signs in
+   └──────┬──────┘
+          │
+          ▼
+   ┌─────────────┐
+   │   Cognito   │  2. Returns ID token (JWT)
+   └──────┬──────┘
+          │
+          ▼
+   ┌─────────────┐
+   │   Browser   │  3. Stores token, makes API calls
+   └──────┬──────┘
+          │
+          ▼
+   ┌─────────────┐
+   │ API Gateway │  4. Validates token with Cognito Authorizer
+   └──────┬──────┘
+          │
+          ▼
+   ┌─────────────┐
+   │   Lambda    │  5. Generates presigned URLs
+   └──┬────────┬─┘
+      │        │
+      ▼        ▼
+   ┌────┐  ┌────┐
+   │ DB │  │ S3 │  6. Stores metadata & photos
+   └────┘  └────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        SECURITY FEATURES                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Private S3 Bucket
+      └─> No public access, all access via presigned URLs
+
+   ✅ Time-Limited URLs
+      └─> Upload: 5 minutes | View: 15 minutes
+
+   ✅ User Authentication
+      └─> Cognito validates all requests
+
+   ✅ API Gateway Authorizer
+      └─> Validates tokens before Lambda invocation
+
+   ✅ Audit Trail
+      └─> DynamoDB tracks all uploads with user info
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        DOCUMENTATION MAP                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   START_HERE.md ──────────> Main entry point
+        │
+        ├─> QUICK_START.md ──────> 3-step fix (5 minutes)
+        │
+        ├─> CRITICAL_FIX.md ─────> Problem explanation
+        │
+        ├─> FIXES_APPLIED.md ────> What was changed
+        │
+        ├─> SUMMARY.md ──────────> Executive summary
+        │
+        ├─> ARCHITECTURE.md ─────> System architecture
+        │
+        └─> DEPLOYMENT_CHECKLIST.md ──> Complete guide
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        QUICK REFERENCE                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   AWS Resources:
+   ├─ Account: 982424467695
+   ├─ Region: ap-south-1
+   ├─ Data Bucket: photos-sharing-aviz-data (PRIVATE)
+   ├─ Hosting Bucket: photos-sharing-aviz-hosting (PUBLIC)
+   ├─ API Gateway: PhotoGalleryAPI
+   ├─ API URL: https://svonqtpij8.execute-api.ap-south-1.amazonaws.com/prod
+   ├─ Cognito Domain: aviz.auth.ap-south-1.amazoncognito.com
+   ├─ Client ID: 5adlqnvavjttjr9rhoe3sb650c
+   └─ DynamoDB Table: PhotoGallery
+
+   Lambda Functions:
+   ├─ uploadPhoto
+   │  └─ Environment: PHOTO_BUCKET_NAME=photos-sharing-aviz-data
+   └─ listPhotos
+      └─ Environment: PHOTO_BUCKET_NAME=photos-sharing-aviz-data
+
+   Scripts:
+   ├─ ./deploy.sh ──────> Deploy all changes
+   └─ ./test-setup.sh ──> Verify configuration
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        TIME ESTIMATES                                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   Deploy:           2 minutes
+   Verify:           1 minute
+   Test:             1 minute
+   Troubleshoot:     1 minute (if needed)
+   ─────────────────────────────
+   Total:            ~5 minutes
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    READY TO START? GO TO:                                    ║
+║                                                                              ║
+║                         START_HERE.md                                        ║
+║                              or                                              ║
+║                        QUICK_START.md                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
